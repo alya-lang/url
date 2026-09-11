@@ -58,13 +58,13 @@ Add `url` to the `[dependencies]` section in your `alya.toml`:
 
 ```toml
 [dependencies]
-url = { git = "https://github.com/alya-lang/url", tag = "v0.1.0" }
+url = { git = "https://github.com/alya-lang/url", branch = "main" }
 ```
 
 Or install it directly using the Alya package CLI:
 
 ```bash
-alyac add url --git https://github.com/alya-lang/url --tag v0.1.0
+alyac add url --git https://github.com/alya-lang/url --branch main
 alyac install
 ```
 
