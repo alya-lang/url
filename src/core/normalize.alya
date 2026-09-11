@@ -1,0 +1,96 @@
+# URL Normalization (RFC 3986 Section 6)
+# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+
+import "../types.alya"
+import "./percent.alya"
+import "./path.alya"
+import "./parser.alya"
+import "./query.alya"
+
+function _to_lower_str(s)
+    let slen = len(s)
+    let res = ""
+    let i = 0
+    while i < slen
+        let ch = char_at(s, i)
+        let c = ord(ch)
+        if c >= 65 and c <= 90
+            res = res + chr(c + 32)
+        else
+            res = res + ch
+        end
+        i += 1
+    end
+    return res
+end
+
+# Normalizes percent-encoding: decodes unreserved chars, uppercases hex digits
+function _normalize_percent_encoding(s)
+    let slen = len(s)
+    let res = ""
+    let i = 0
+    while i < slen
+        let ch = char_at(s, i)
+        if ch == "%" and i + 2 < slen
+            let h1 = _url_from_hex(char_at(s, i + 1))
+            let h2 = _url_from_hex(char_at(s, i + 2))
+            if h1 >= 0 and h2 >= 0
+                let code = h1 * 16 + h2
+                if _url_is_unreserved(code) == 1
+                    res = res + chr(code)
+                else
+                    res = res + "%" + _url_to_hex(code)
+                end
+                i += 2
+            else
+                res = res + ch
+            end
+        else
+            res = res + ch
+        end
+        i += 1
+    end
+    return res
+end
+
+# Fully normalizes a raw URL per RFC 3986 Section 6
+function url_normalize(raw_url)
+    let u = url_parse(raw_url)
+
+    # 1. Lowercase scheme
+    u.scheme = _to_lower_str(u.scheme)
+    u.url_scheme = u.scheme
+
+    # 2. Lowercase host
+    u.host = _to_lower_str(u.host)
+    u.url_host = u.host
+
+    # 3. Strip default ports
+    let def_port = url_default_port(u.scheme)
+    if len(def_port) > 0 and u.port == def_port
+        u.port = ""
+        u.url_port = ""
+    end
+
+    # 4. Normalize path: remove dot segments & uppercase percent-encoding
+    if len(u.path) > 0
+        let norm_path = url_remove_dot_segments(u.path)
+        norm_path = _normalize_percent_encoding(norm_path)
+        u.path = norm_path
+        u.url_path = norm_path
+    elif len(u.scheme) > 0
+        u.path = "/"
+        u.url_path = "/"
+    end
+
+    # 5. Normalize query: decode unreserved percent-encoding and sort params
+    if len(u.query) > 0
+        let sp = search_params_from_string(u.query)
+        search_params_sort(sp)
+        let norm_q = search_params_to_string(sp)
+        u.query = norm_q
+        u.url_query = norm_q
+    end
+
+    return url_format(u)
+end

@@ -1,0 +1,76 @@
+# Parser test suite for url package
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("URL Parser & Formatter Test Suite")
+    let r = runner_new()
+
+    # 1. Full standard HTTP URL
+    let u1 = url::parse("https://alice:secret@api.example.com:8443/v1/users?role=admin&active=true#section-2")
+    runner_assert_str_eq(r, u1.scheme, "https", "u1.scheme is https")
+    runner_assert_str_eq(r, u1.url_scheme, "https", "legacy u1.url_scheme is https")
+    runner_assert_str_eq(r, u1.username, "alice", "u1.username is alice")
+    runner_assert_str_eq(r, u1.password, "secret", "u1.password is secret")
+    runner_assert_str_eq(r, u1.host, "api.example.com", "u1.host is api.example.com")
+    runner_assert_str_eq(r, u1.port, "8443", "u1.port is 8443")
+    runner_assert_str_eq(r, u1.path, "/v1/users", "u1.path is /v1/users")
+    runner_assert_str_eq(r, u1.query, "role=admin&active=true", "u1.query is correct")
+    runner_assert_str_eq(r, u1.fragment, "section-2", "u1.fragment is section-2")
+    runner_assert_str_eq(r, url::format(u1), "https://alice:secret@api.example.com:8443/v1/users?role=admin&active=true#section-2", "url::format roundtrip matches")
+
+    # 2. Origin generation
+    runner_assert_str_eq(r, url::url_origin(u1), "https://api.example.com:8443", "url_origin includes port when specified")
+
+    # 3. Simple URL with default port behavior
+    let u2 = url::parse("http://example.org/")
+    runner_assert_str_eq(r, u2.scheme, "http", "u2.scheme is http")
+    runner_assert_str_eq(r, u2.host, "example.org", "u2.host is example.org")
+    runner_assert_str_eq(r, u2.port, "", "u2.port is empty")
+    runner_assert_str_eq(r, u2.path, "/", "u2.path is /")
+    runner_assert_str_eq(r, url::url_origin(u2), "http://example.org", "url_origin without port")
+    runner_assert_str_eq(r, url::url_effective_port(u2), "80", "effective port for http is 80")
+    runner_assert_eq(r, url::url_is_http(u2), 1, "u2 is http")
+    runner_assert_eq(r, url::url_is_https(u2), 0, "u2 is not https")
+
+    # 4. HTTPS effective port
+    let u3 = url::parse("https://secure.com")
+    runner_assert_str_eq(r, url::url_effective_port(u3), "443", "effective port for https is 443")
+    runner_assert_eq(r, url::url_is_https(u3), 1, "u3 is https")
+
+    # 5. IPv4 Host
+    let u4 = url::parse("http://127.0.0.1:3000/health")
+    runner_assert_str_eq(r, u4.host, "127.0.0.1", "IPv4 host parsed")
+    runner_assert_str_eq(r, u4.port, "3000", "IPv4 port parsed")
+    runner_assert_str_eq(r, u4.path, "/health", "IPv4 path parsed")
+
+    # 6. Bracketed IPv6 Host
+    let u5 = url::parse("http://[::1]:8080/test")
+    runner_assert_str_eq(r, u5.host, "[::1]", "bracketed IPv6 host parsed")
+    runner_assert_str_eq(r, u5.port, "8080", "bracketed IPv6 port parsed")
+
+    # 7. Non-hierarchical / Opaque URLs
+    let u6 = url::parse("mailto:support@example.com?subject=help")
+    runner_assert_str_eq(r, u6.scheme, "mailto", "mailto scheme parsed")
+    runner_assert_str_eq(r, u6.path, "support@example.com", "mailto path parsed")
+    runner_assert_str_eq(r, u6.query, "subject=help", "mailto query parsed")
+    runner_assert_str_eq(r, url::format(u6), "mailto:support@example.com?subject=help", "mailto format roundtrip")
+
+    # 8. Protocol default ports catalog
+    runner_assert_str_eq(r, url::url_default_port("http"), "80", "default port http")
+    runner_assert_str_eq(r, url::url_default_port("https"), "443", "default port https")
+    runner_assert_str_eq(r, url::url_default_port("ws"), "80", "default port ws")
+    runner_assert_str_eq(r, url::url_default_port("wss"), "443", "default port wss")
+    runner_assert_str_eq(r, url::url_default_port("ftp"), "21", "default port ftp")
+    runner_assert_str_eq(r, url::url_default_port("ssh"), "22", "default port ssh")
+    runner_assert_str_eq(r, url::url_default_port("redis"), "6379", "default port redis")
+    runner_assert_str_eq(r, url::url_default_port("postgres"), "5432", "default port postgres")
+    runner_assert_str_eq(r, url::url_default_port("mysql"), "3306", "default port mysql")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

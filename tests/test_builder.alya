@@ -1,0 +1,62 @@
+# Fluent URL Builder test suite for url package
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("Fluent URL Builder Test Suite")
+    let r = runner_new()
+
+    # 1. Build full URL from scratch
+    let b1 = url::builder()
+    url::builder_scheme(b1, "https")
+    url::builder_credentials(b1, "alice", "topsecret")
+    url::builder_host(b1, "api.example.com")
+    url::builder_port(b1, "9000")
+    url::builder_path(b1, "/v1")
+    url::builder_append_path(b1, "reports")
+    url::builder_param(b1, "format", "json")
+    url::builder_param(b1, "limit", "50")
+    url::builder_fragment(b1, "summary")
+
+    let u1 = url::builder_build(b1)
+    runner_assert_str_eq(r, u1.scheme, "https", "b1 built scheme")
+    runner_assert_str_eq(r, u1.username, "alice", "b1 built username")
+    runner_assert_str_eq(r, u1.password, "topsecret", "b1 built password")
+    runner_assert_str_eq(r, u1.host, "api.example.com", "b1 built host")
+    runner_assert_str_eq(r, u1.port, "9000", "b1 built port")
+    runner_assert_str_eq(r, u1.path, "/v1/reports", "b1 built path with append")
+    runner_assert_str_eq(r, u1.query, "format=json&limit=50", "b1 built query")
+    runner_assert_str_eq(r, u1.fragment, "summary", "b1 built fragment")
+    runner_assert_str_eq(r, url::builder_to_string(b1), "https://alice:topsecret@api.example.com:9000/v1/reports?format=json&limit=50#summary", "b1 formatted string")
+
+    # 2. Build from existing URL string and mutate
+    let b2 = url::builder_from_string("https://example.com/api/v1?page=1")
+    url::builder_append_path(b2, "users")
+    url::builder_param(b2, "active", "true")
+    runner_assert_str_eq(r, url::builder_to_string(b2), "https://example.com/api/v1/users?page=1&active=true", "b2 mutated URL string")
+
+    # 3. Build from Url struct
+    let orig = url::parse("http://insecure.internal:8080/data")
+    let b3 = url::builder_from_url(orig)
+    url::builder_scheme(b3, "https")
+    url::builder_port(b3, "8443")
+    let u3 = url::builder_build(b3)
+    runner_assert_str_eq(r, u3.scheme, "https", "b3 upgraded scheme to https")
+    runner_assert_str_eq(r, u3.port, "8443", "b3 updated port to 8443")
+    runner_assert_str_eq(r, url::format(u3), "https://insecure.internal:8443/data", "b3 formatted string")
+
+    # 4. Empty path defaults to "/" when scheme is present
+    let b4 = url::builder()
+    url::builder_scheme(b4, "http")
+    url::builder_host(b4, "example.org")
+    let u4 = url::builder_build(b4)
+    runner_assert_str_eq(r, u4.path, "/", "empty path defaults to /")
+    runner_assert_str_eq(r, url::format(u4), "http://example.org/", "formatted with root path")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

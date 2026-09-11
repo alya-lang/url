@@ -1,0 +1,92 @@
+# Query parameters and UrlSearchParams test suite for url package
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("Query String & UrlSearchParams Test Suite")
+    let r = runner_new()
+
+    # 1. Procedural url_parse_query
+    let q1 = url::url_parse_query("?name=Alice&city=New+York&active=true")
+    runner_assert_str_eq(r, q1["name"], "Alice", "q1 name parsed")
+    runner_assert_str_eq(r, q1["city"], "New York", "q1 city with '+' decoded to space")
+    runner_assert_str_eq(r, q1["active"], "true", "q1 active parsed")
+
+    # 2. Procedural url_format_query
+    let m = { "page": "1", "limit": "25" }
+    let fq = url::url_format_query(m)
+    runner_assert_eq(r, fq == "page=1&limit=25" or fq == "limit=25&page=1", 1, "url_format_query formats map")
+
+    # 3. Procedural URL query parameter modifiers
+    let raw = "https://example.com/api?q=alya&lang=en"
+    runner_assert_str_eq(r, url::url_get_query_param(raw, "q"), "alya", "url_get_query_param finds existing key")
+    runner_assert_str_eq(r, url::url_get_query_param(raw, "missing"), "", "url_get_query_param returns empty for missing key")
+    runner_assert_eq(r, url::url_has_query_param(raw, "lang"), 1, "url_has_query_param returns 1 for existing key")
+    runner_assert_eq(r, url::url_has_query_param(raw, "foo"), 0, "url_has_query_param returns 0 for missing key")
+
+    let added = url::url_set_query_param(raw, "page", "2")
+    runner_assert_str_eq(r, url::url_get_query_param(added, "page"), "2", "url_set_query_param adds new parameter")
+
+    let updated = url::url_set_query_param(raw, "q", "rust")
+    runner_assert_str_eq(r, url::url_get_query_param(updated, "q"), "rust", "url_set_query_param updates existing key")
+
+    let removed = url::url_remove_query_param(raw, "lang")
+    runner_assert_eq(r, url::url_has_query_param(removed, "lang"), 0, "url_remove_query_param removes key")
+
+    let appended = url::url_append_query_param(raw, "filter", "active")
+    runner_assert_str_eq(r, url::url_get_query_param(appended, "filter"), "active", "url_append_query_param appends parameter")
+
+    # 4. WHATWG UrlSearchParams - Basic operations
+    let sp = url::search_params_from("foo=1&bar=2&bar=3&baz=hello%20world")
+    runner_assert_eq(r, url::search_params_len(sp), 4, "sp initial length is 4")
+    runner_assert_str_eq(r, url::search_params_get(sp, "foo"), "1", "search_params_get finds first match")
+    runner_assert_str_eq(r, url::search_params_get(sp, "bar"), "2", "search_params_get finds first duplicate match")
+    runner_assert_str_eq(r, url::search_params_get(sp, "baz"), "hello world", "search_params_get percent-decoded")
+
+    let bar_all = url::search_params_get_all(sp, "bar")
+    runner_assert_eq(r, len(bar_all), 2, "search_params_get_all returns 2 values for bar")
+    runner_assert_str_eq(r, bar_all[0], "2", "bar_all[0] is 2")
+    runner_assert_str_eq(r, bar_all[1], "3", "bar_all[1] is 3")
+
+    runner_assert_eq(r, url::search_params_has(sp, "foo"), 1, "search_params_has true for foo")
+    runner_assert_eq(r, url::search_params_has(sp, "unknown"), 0, "search_params_has false for unknown")
+
+    # 5. UrlSearchParams - Mutation (set, append, delete)
+    url::search_params_set(sp, "bar", "99")
+    runner_assert_str_eq(r, url::search_params_get(sp, "bar"), "99", "search_params_set collapses duplicates and sets new value")
+    runner_assert_eq(r, len(url::search_params_get_all(sp, "bar")), 1, "search_params_set leaves only 1 entry for key")
+
+    url::search_params_append(sp, "tag", "alya")
+    url::search_params_append(sp, "tag", "lang")
+    runner_assert_eq(r, len(url::search_params_get_all(sp, "tag")), 2, "search_params_append allows multiple entries")
+
+    url::search_params_delete(sp, "foo")
+    runner_assert_eq(r, url::search_params_has(sp, "foo"), 0, "search_params_delete removes all foo entries")
+
+    # 6. UrlSearchParams - Sort
+    let sp_sort = url::search_params_from("z=last&b=second&a=first")
+    url::search_params_sort(sp_sort)
+    runner_assert_str_eq(r, url::search_params_to_string(sp_sort), "a=first&b=second&z=last", "search_params_sort sorts keys alphabetically")
+
+    # 7. UrlSearchParams - to_map and keys
+    let sp_map = url::search_params_from("x=10&y=20")
+    let converted_map = url::search_params_to_map(sp_map)
+    runner_assert_str_eq(r, converted_map["x"], "10", "converted_map x is 10")
+    runner_assert_str_eq(r, converted_map["y"], "20", "converted_map y is 20")
+
+    let sp_keys = url::search_params_keys(sp_sort)
+    runner_assert_eq(r, len(sp_keys), 3, "sp_keys has 3 unique keys")
+    runner_assert_str_eq(r, sp_keys[0], "a", "first key is a")
+    runner_assert_str_eq(r, sp_keys[1], "b", "second key is b")
+    runner_assert_str_eq(r, sp_keys[2], "z", "third key is z")
+
+    url::search_params_clear(sp_map)
+    runner_assert_eq(r, url::search_params_len(sp_map), 0, "search_params_clear empties container")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

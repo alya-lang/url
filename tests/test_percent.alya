@@ -1,0 +1,38 @@
+# Percent encoding and decoding test suite for url package
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("Percent Encoding & Decoding Test Suite")
+    let r = runner_new()
+
+    # 1. url_encode unreserved chars
+    runner_assert_str_eq(r, url::url_encode("Hello-World_123.test~"), "Hello-World_123.test~", "unreserved chars untouched")
+
+    # 2. url_encode reserved & special chars
+    runner_assert_str_eq(r, url::url_encode("hello world!"), "hello%20world%21", "spaces and exclamation encoded")
+    runner_assert_str_eq(r, url::url_encode("a&b=c"), "a%26b%3Dc", "& and = encoded")
+    runner_assert_str_eq(r, url::url_encode("/api/users"), "%2Fapi%2Fusers", "slashes encoded in standard encode")
+
+    # 3. url_decode standard (handles %20 and +)
+    runner_assert_str_eq(r, url::url_decode("hello%20world"), "hello world", "%20 decoded to space")
+    runner_assert_str_eq(r, url::url_decode("hello+world"), "hello world", "+ decoded to space")
+    runner_assert_str_eq(r, url::url_decode("a%26b%3Dc"), "a&b=c", "delimiters decoded")
+    runner_assert_str_eq(r, url::url_decode("%2Fapi%2Fusers"), "/api/users", "slashes decoded")
+    runner_assert_str_eq(r, url::url_decode("case%2ftest"), "case/test", "lowercase hex decoded")
+
+    # 4. url_decode_component (preserves '+' as literal '+')
+    runner_assert_str_eq(r, url::url_decode_component("1+1=2"), "1+1=2", "+ preserved in component decode")
+    runner_assert_str_eq(r, url::url_decode_component("hello%20world%2Bplus"), "hello world+plus", "%20 and %2B decoded")
+
+    # 5. url_encode_path (preserves '/')
+    runner_assert_str_eq(r, url::url_encode_path("/users/alice smith/docs"), "/users/alice%20smith/docs", "slashes preserved, spaces encoded")
+    runner_assert_str_eq(r, url::url_encode_path("/foo/bar?baz"), "/foo/bar%3Fbaz", "? encoded in path")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

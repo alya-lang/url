@@ -1,0 +1,230 @@
+# URL Path manipulation, dot-segment normalization, and reference resolution (RFC 3986)
+# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+
+import "../types.alya"
+import "./percent.alya"
+
+function _url_find(s, target, start_idx)
+    let slen = len(s)
+    let tlen = len(target)
+    if tlen == 0
+        return start_idx
+    end
+    let i = start_idx
+    while i + tlen <= slen
+        if substring(s, i, tlen) == target
+            return i
+        end
+        i += 1
+    end
+    return -1
+end
+
+# Splits a URL struct into non-empty path segments
+function url_path_segments(u)
+    let p = str_from_ptr(u.path)
+    if len(p) == 0
+        p = str_from_ptr(u.url_path)
+    end
+
+    let plen = len(p)
+    if plen == 0
+        return []
+    end
+    let raw_segs = split(p, "/")
+    let res = []
+    let slen = array_len(raw_segs)
+    let i = 0
+    while i < slen
+        let seg = str_from_ptr(raw_segs[i])
+        if len(seg) > 0
+            res.push(seg)
+        end
+        i += 1
+    end
+    return res
+end
+
+# RFC 3986 Section 5.2.4: Remove Dot Segments algorithm
+function url_remove_dot_segments(path)
+    let p = str_from_ptr(path)
+    let plen = len(p)
+    if plen == 0
+        return ""
+    end
+
+    let starts_slash = char_at(p, 0) == "/"
+    let ends_slash = char_at(p, plen - 1) == "/"
+    let ends_dot = 0
+    if plen >= 2 and substring(p, plen - 2, 2) == "/."
+        ends_dot = 1
+    elif plen >= 3 and substring(p, plen - 3, 3) == "/.."
+        ends_dot = 1
+    end
+    let should_end_slash = ends_slash == 1 or ends_dot == 1
+
+    let raw_segs = split(p, "/")
+    let stack = []
+    let slen = array_len(raw_segs)
+    let i = 0
+
+    while i < slen
+        let seg = str_from_ptr(raw_segs[i])
+        if seg == "" or seg == "."
+            # ignore empty or current directory
+        elif seg == ".."
+            if array_len(stack) > 0
+                stack.pop()
+            end
+        else
+            stack.push(seg)
+        end
+        i += 1
+    end
+
+    let out = ""
+    let stlen = array_len(stack)
+    let j = 0
+    while j < stlen
+        out = out + "/" + str_from_ptr(stack[j])
+        j += 1
+    end
+
+    if len(out) == 0
+        if starts_slash == 1
+            return "/"
+        end
+        return ""
+    end
+
+    if starts_slash == 0 and len(out) > 1
+        out = substring(out, 1, len(out) - 1)
+    end
+
+    if should_end_slash == 1 and char_at(out, len(out) - 1) != "/"
+        out = out + "/"
+    end
+
+    return out
+end
+
+# Joins two path strings without duplicate slashes
+function url_join_path(base_path, rel_path)
+    let b = str_from_ptr(base_path)
+    let r = str_from_ptr(rel_path)
+    let blen = len(b)
+    let rlen = len(r)
+
+    if blen == 0
+        return r
+    end
+    if rlen == 0
+        return b
+    end
+
+    let b_ends_slash = char_at(b, blen - 1) == "/"
+    let r_starts_slash = char_at(r, 0) == "/"
+
+    if b_ends_slash == 1 and r_starts_slash == 1
+        return substring(b, 0, blen - 1) + r
+    elif b_ends_slash == 0 and r_starts_slash == 0
+        return b + "/" + r
+    else
+        return b + r
+    end
+end
+
+# Resolves a relative URL against a base URL (RFC 3986 Section 5)
+function url_join(base, relative)
+    let b = str_from_ptr(base)
+    let r = str_from_ptr(relative)
+    let blen = len(b)
+    let rlen = len(r)
+
+    if blen == 0
+        return r
+    end
+    if rlen == 0
+        return b
+    end
+
+    # If relative is an absolute URL with scheme
+    let r_scheme_idx = _url_find(r, "://", 0)
+    if r_scheme_idx >= 0
+        return r
+    end
+
+    # Check if base has scheme
+    let b_scheme_idx = _url_find(b, "://", 0)
+    if b_scheme_idx < 0
+        # Neither has scheme: fallback to simple path joining
+        return url_join_path(b, r)
+    end
+
+    let scheme = substring(b, 0, b_scheme_idx)
+    let b_after_scheme = substring(b, b_scheme_idx + 3, blen - (b_scheme_idx + 3))
+
+    # Protocol-relative URL: //example.com/foo
+    if len(r) >= 2 and substring(r, 0, 2) == "//"
+        return scheme + ":" + r
+    end
+
+    # Find authority and path in base
+    let b_slash_idx = _url_find(b_after_scheme, "/", 0)
+    let authority = ""
+    let b_path = ""
+    if b_slash_idx >= 0
+        authority = substring(b_after_scheme, 0, b_slash_idx)
+        b_path = substring(b_after_scheme, b_slash_idx, len(b_after_scheme) - b_slash_idx)
+    else
+        authority = b_after_scheme
+        b_path = "/"
+    end
+
+    # Strip query and fragment from base path
+    let q_idx = _url_find(b_path, "?", 0)
+    if q_idx >= 0
+        b_path = substring(b_path, 0, q_idx)
+    end
+    let h_idx = _url_find(b_path, "#", 0)
+    if h_idx >= 0
+        b_path = substring(b_path, 0, h_idx)
+    end
+
+    # 1. Query-only relative: ?q=1
+    if char_at(r, 0) == "?"
+        return scheme + "://" + authority + b_path + r
+    end
+
+    # 2. Fragment-only relative: #section
+    if char_at(r, 0) == "#"
+        return b + r
+    end
+
+    # 3. Absolute path relative: /new/path
+    if char_at(r, 0) == "/"
+        let norm_path = url_remove_dot_segments(r)
+        return scheme + "://" + authority + norm_path
+    end
+
+    # 4. Relative path: dir/file or ../file
+    let last_slash = -1
+    let bplen = len(b_path)
+    let k = bplen - 1
+    while k >= 0
+        if char_at(b_path, k) == "/"
+            last_slash = k
+            break
+        end
+        k -= 1
+    end
+
+    let base_dir = "/"
+    if last_slash >= 0
+        base_dir = substring(b_path, 0, last_slash + 1)
+    end
+
+    let merged = base_dir + r
+    let clean_path = url_remove_dot_segments(merged)
+    return scheme + "://" + authority + clean_path
+end

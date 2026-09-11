@@ -1,0 +1,39 @@
+# URL Normalization test suite for url package
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("URL Normalization Test Suite")
+    let r = runner_new()
+
+    # 1. Lowercase scheme and host (preserves path case)
+    runner_assert_str_eq(r, url::normalize("HTTP://EXAMPLE.COM/Path/To/Doc"), "http://example.com/Path/To/Doc", "scheme and host lowercased, path case preserved")
+    runner_assert_str_eq(r, url::normalize("HTTPS://WWW.ALYA-LANG.ORG/"), "https://www.alya-lang.org/", "https host lowercased")
+
+    # 2. Stripping standard default ports
+    runner_assert_str_eq(r, url::normalize("http://example.com:80/"), "http://example.com/", "port 80 stripped for http")
+    runner_assert_str_eq(r, url::normalize("https://example.com:443/"), "https://example.com/", "port 443 stripped for https")
+    runner_assert_str_eq(r, url::normalize("ws://example.com:80/socket"), "ws://example.com/socket", "port 80 stripped for ws")
+    runner_assert_str_eq(r, url::normalize("wss://example.com:443/secure-socket"), "wss://example.com/secure-socket", "port 443 stripped for wss")
+
+    # 3. Preserving non-default ports
+    runner_assert_str_eq(r, url::normalize("http://example.com:8080/"), "http://example.com:8080/", "custom port 8080 preserved for http")
+    runner_assert_str_eq(r, url::normalize("https://example.com:8443/"), "https://example.com:8443/", "custom port 8443 preserved for https")
+
+    # 4. Dot segment removal in path
+    runner_assert_str_eq(r, url::normalize("http://example.com/a/b/../c/./d"), "http://example.com/a/c/d", "dot segments removed in path")
+    runner_assert_str_eq(r, url::normalize("http://example.com"), "http://example.com/", "empty path normalized to root slash")
+
+    # 5. Percent-encoding normalization: unreserved characters decoded
+    runner_assert_str_eq(r, url::normalize("http://example.com/%7Ealice/%66oo"), "http://example.com/~alice/foo", "unreserved percent-encoding decoded (~ and f)")
+
+    # 6. Query string parameter sorting
+    runner_assert_str_eq(r, url::normalize("http://example.com/?z=last&a=first&m=middle"), "http://example.com/?a=first&m=middle&z=last", "query parameters sorted in canonical order")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

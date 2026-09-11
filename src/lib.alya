@@ -1,14 +1,54 @@
-# url library
+# url - WHATWG and RFC 3986 Compliant URL Library for Alya
 # Part of the Alya Language package ecosystem (https://github.com/alya-lang)
 
 import "./types.alya"
-import "./core/formatter.alya"
+import "./core/percent.alya"
+import "./core/path.alya"
+import "./core/parser.alya"
+import "./core/query.alya"
+import "./core/builder.alya"
+import "./core/normalize.alya"
 
-# Public facade functions
-function hello(name = "World")
-    return core_format_greeting(name)
+# ═══════════════════════════════════════════════════════════════
+# High-Level Idiomatic API
+# ═══════════════════════════════════════════════════════════════
+
+# Parse a URL string into a Url struct
+function parse(raw_url)
+    return url_parse(raw_url)
 end
 
-function new_config(name = "World", count = 1)
-    return make_config(name, count)
+# Format a Url struct into a URL string
+function format(u)
+    return url_format(u)
+end
+
+# Convert a Url struct to string
+function to_string(u)
+    return url_format(u)
+end
+
+# Create a new fluent URL builder
+function builder()
+    return url_builder()
+end
+
+# Create a new empty UrlSearchParams container
+function search_params()
+    return search_params_new()
+end
+
+# Create UrlSearchParams from a query string
+function search_params_from(query_str)
+    return search_params_from_string(query_str)
+end
+
+# Normalize a URL string
+function normalize(raw_url)
+    return url_normalize(raw_url)
+end
+
+# Resolve a relative URL or path against a base URL
+function join(base, relative)
+    return url_join(base, relative)
 end

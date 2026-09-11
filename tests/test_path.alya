@@ -1,0 +1,68 @@
+# Path operations, dot-segment removal, and reference resolution test suite
+import "std/test"
+import "../src/lib.alya" as url
+
+function main()
+    test_suite("URL Path Operations & Resolution Test Suite")
+    let r = runner_new()
+
+    # 1. url_path_segments
+    let u1 = url::parse("https://example.com/api/v1/users/42")
+    let segs1 = url::url_path_segments(u1)
+    runner_assert_eq(r, len(segs1), 4, "4 path segments found")
+    runner_assert_str_eq(r, segs1[0], "api", "seg 0 is api")
+    runner_assert_str_eq(r, segs1[1], "v1", "seg 1 is v1")
+    runner_assert_str_eq(r, segs1[2], "users", "seg 2 is users")
+    runner_assert_str_eq(r, segs1[3], "42", "seg 3 is 42")
+
+    let u_empty_path = url::parse("https://example.com")
+    let segs_empty = url::url_path_segments(u_empty_path)
+    runner_assert_eq(r, len(segs_empty), 0, "empty path has 0 segments")
+
+    # 2. RFC 3986 5.2.4: url_remove_dot_segments
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/a/b/c/./../../g"), "/a/g", "RFC 3986 5.2.4 test 1")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("mid/content=5/../6"), "mid/6", "RFC 3986 5.2.4 test 2")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/."), "/", "trailing dot normalized to slash")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/.."), "/", "trailing dot-dot normalized to slash")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/a/b/c/"), "/a/b/c/", "trailing slash preserved")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/a/b/c/."), "/a/b/c/", "dot at end of path")
+    runner_assert_str_eq(r, url::url_remove_dot_segments("/a/./b/../c/"), "/a/c/", "mixed dot segments")
+
+    # 3. url_join reference resolution (RFC 3986 Section 5)
+    let base = "https://example.com/api/v1/catalog"
+
+    # Absolute URL reference
+    runner_assert_str_eq(r, url::join(base, "http://external.com/docs"), "http://external.com/docs", "absolute URL overrides base")
+
+    # Protocol-relative reference
+    runner_assert_str_eq(r, url::join(base, "//cdn.example.com/assets/logo.png"), "https://cdn.example.com/assets/logo.png", "protocol-relative inherits base scheme")
+
+    # Absolute path reference
+    runner_assert_str_eq(r, url::join(base, "/root"), "https://example.com/root", "absolute path replaces base path")
+
+    # Relative path without trailing slash in base
+    runner_assert_str_eq(r, url::join(base, "items"), "https://example.com/api/v1/items", "relative path joins to base directory")
+
+    # Relative path with trailing slash in base
+    runner_assert_str_eq(r, url::join("https://example.com/api/v1/", "items"), "https://example.com/api/v1/items", "relative path joins to trailing slash base")
+
+    # Relative path with parent directory navigation (..)
+    runner_assert_str_eq(r, url::join("https://example.com/api/v1/", "../v2/items"), "https://example.com/api/v2/items", "parent traversal (..) in join")
+
+    # Query-only reference
+    runner_assert_str_eq(r, url::join(base, "?sort=desc"), "https://example.com/api/v1/catalog?sort=desc", "query reference replaces query")
+
+    # Fragment-only reference
+    runner_assert_str_eq(r, url::join(base, "#heading-1"), "https://example.com/api/v1/catalog#heading-1", "fragment reference appends fragment")
+
+    # Fallback path joining when base is not a full URL
+    runner_assert_str_eq(r, url::join("foo/bar", "baz"), "foo/bar/baz", "simple path join without duplicate slashes")
+    runner_assert_str_eq(r, url::join("foo/bar/", "/baz"), "foo/bar/baz", "simple path join with overlapping slashes")
+
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+main()

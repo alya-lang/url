@@ -1,15 +1,62 @@
-# Example usage of url
-import "../src/lib.alya" as pkg
+# Example showcase for url package (WHATWG / RFC 3986)
+import "../src/lib.alya" as url
 
 function main()
-    # Basic greeting
-    let msg = pkg::hello("Alya Developer")
-    say msg
+    say "═══════════════════════════════════════════════════════════════════"
+    say "  Alya URL Package Showcase (WHATWG & RFC 3986 Standard)"
+    say "═══════════════════════════════════════════════════════════════════"
 
-    # Using configuration struct
-    let cfg = pkg::new_config("Modular Architecture", 5)
-    say "Target: " + cfg.name
-    say "Formatted: " + pkg::core_format_custom(cfg)
+    # 1. Parsing a complex URL
+    say "\n[1] Parsing Complex URL:"
+    let raw = "https://developer:token123@api.alya-lang.org:8443/v1/packages/search?q=crypto&page=1#results"
+    let u = url::parse(raw)
+    say "  Scheme   : " + u.scheme
+    say "  User     : " + u.username
+    say "  Password : " + u.password
+    say "  Host     : " + u.host
+    say "  Port     : " + u.port
+    say "  Path     : " + u.path
+    say "  Query    : " + u.query
+    say "  Fragment : " + u.fragment
+    say "  Origin   : " + url::url_origin(u)
+    say "  Is HTTPS : " + url::url_is_https(u)
+
+    # 2. Working with UrlSearchParams
+    say "\n[2] UrlSearchParams Manipulation:"
+    let sp = url::search_params_from(u.query)
+    say "  Param 'q'    : " + url::search_params_get(sp, "q")
+    say "  Param 'page' : " + url::search_params_get(sp, "page")
+    url::search_params_append(sp, "sort", "stars")
+    url::search_params_set(sp, "page", "2")
+    say "  New Query    : " + url::search_params_to_string(sp)
+
+    # 3. Fluent URL Builder
+    say "\n[3] Constructing URL with Fluent Builder:"
+    let b = url::builder()
+    url::builder_scheme(b, "https")
+    url::builder_host(b, "github.com")
+    url::builder_path(b, "/alya-lang")
+    url::builder_append_path(b, "url")
+    url::builder_param(b, "tab", "readme-ov-file")
+    url::builder_fragment(b, "contributing")
+    let built_url = url::builder_to_string(b)
+    say "  Built URL    : " + built_url
+
+    # 4. Relative URL Reference Resolution (RFC 3986)
+    say "\n[4] Resolving Relative References:"
+    let base = "https://example.com/docs/api/v1/overview"
+    say "  Base         : " + base
+    say "  Join 'auth'  : " + url::join(base, "auth")
+    say "  Join '../v2' : " + url::join(base, "../v2/overview")
+    say "  Join '/root' : " + url::join(base, "/root")
+
+    # 5. URL Normalization
+    say "\n[5] URL Normalization:"
+    let messy = "HTTP://EXAMPLE.COM:80/a/b/../c/./d?z=2&a=1"
+    say "  Messy        : " + messy
+    say "  Normalized   : " + url::normalize(messy)
+
+    say "\n✓ Showcase completed successfully!"
 end
 
 main()

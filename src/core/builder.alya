@@ -1,0 +1,111 @@
+# Fluent URL Builder implementation
+# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+
+import "../types.alya"
+import "./percent.alya"
+import "./path.alya"
+import "./parser.alya"
+import "./query.alya"
+
+function url_builder()
+    return url_builder_create()
+end
+
+function builder_from_url(u)
+    let b = url_builder_create()
+    b.b_scheme = str_from_ptr(u.scheme)
+    b.b_username = str_from_ptr(u.username)
+    b.b_password = str_from_ptr(u.password)
+    b.b_host = str_from_ptr(u.host)
+    b.b_port = str_from_ptr(u.port)
+    b.b_path = str_from_ptr(u.path)
+    b.b_fragment = str_from_ptr(u.fragment)
+
+    let sp = search_params_from_string(str_from_ptr(u.query))
+    b.b_params = sp.entries
+    return b
+end
+
+function builder_from_string(raw_url)
+    let u = url_parse(raw_url)
+    return builder_from_url(u)
+end
+
+function builder_scheme(b, scheme)
+    b.b_scheme = str_from_ptr(scheme)
+    return b
+end
+
+function builder_credentials(b, username, password)
+    b.b_username = str_from_ptr(username)
+    b.b_password = str_from_ptr(password)
+    return b
+end
+
+function builder_username(b, username)
+    b.b_username = str_from_ptr(username)
+    return b
+end
+
+function builder_password(b, password)
+    b.b_password = str_from_ptr(password)
+    return b
+end
+
+function builder_host(b, host)
+    b.b_host = str_from_ptr(host)
+    return b
+end
+
+function builder_port(b, port)
+    b.b_port = str_from_ptr(port)
+    return b
+end
+
+function builder_path(b, path)
+    b.b_path = str_from_ptr(path)
+    return b
+end
+
+function builder_append_path(b, segment)
+    let s = str_from_ptr(segment)
+    b.b_path = url_join_path(b.b_path, s)
+    return b
+end
+
+function builder_param(b, key, value)
+    let p = b.b_params
+    p.push([str_from_ptr(key), str_from_ptr(value)])
+    return b
+end
+
+function builder_query(b, query_str)
+    let sp = search_params_from_string(query_str)
+    let elen = array_len(sp.entries)
+    let i = 0
+    while i < elen
+        b.b_params.push(sp.entries[i])
+        i += 1
+    end
+    return b
+end
+
+function builder_fragment(b, fragment)
+    b.b_fragment = str_from_ptr(fragment)
+    return b
+end
+
+function builder_build(b)
+    let sp = search_params_create(b.b_params)
+    let q_str = search_params_to_string(sp)
+    let pth = b.b_path
+    if len(pth) == 0 and len(b.b_scheme) > 0
+        pth = "/"
+    end
+    return url_create(b.b_scheme, b.b_username, b.b_password, b.b_host, b.b_port, pth, q_str, b.b_fragment)
+end
+
+function builder_to_string(b)
+    let u = builder_build(b)
+    return url_format(u)
+end
