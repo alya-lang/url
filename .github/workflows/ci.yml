@@ -42,5 +42,5 @@ jobs:
 
       - name: Run package test suite
         run: |
-          alyac run tests/test_basic.alya
+          alyac test
 
