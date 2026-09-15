@@ -18,7 +18,6 @@ WHATWG and RFC 3986 compliant URL parser, serializer, normalizer, reference reso
 - 🧹 **RFC 3986 Normalization**: Lowercases scheme and host, removes standard default ports (80 for http, 443 for https), eliminates dot segments (`.`, `..`), and normalizes percent-encodings.
 - 📋 **WHATWG `UrlSearchParams`**: Full query parameter manipulation container supporting duplicate keys, `get`, `get_all`, `has`, `set`, `append`, `delete`, `sort`, `to_string`, and `to_map`.
 - 🛠️ **Fluent `UrlBuilder`**: Clean builder API for constructing and mutating complex URLs incrementally.
-- 🔄 **100% Stdlib Drop-in Compatibility**: Fully backwards compatible with existing `stdlib/url.alya` functions and field access patterns (`.scheme` and `.url_scheme`).
 
 ---
 

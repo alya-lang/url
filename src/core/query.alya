@@ -101,7 +101,6 @@ function url_set_query_param(raw_url, key, value)
     q_map[k] = v
     let nq = url_format_query(q_map)
     u.query = nq
-    u.url_query = nq
     return url_format(u)
 end
 
@@ -123,7 +122,6 @@ function url_remove_query_param(raw_url, key)
     end
     let nq = url_format_query(new_map)
     u.query = nq
-    u.url_query = nq
     return url_format(u)
 end
 
@@ -139,7 +137,6 @@ function url_append_query_param(raw_url, key, value)
     else
         u.query = pair
     end
-    u.url_query = u.query
     return url_format(u)
 end
 

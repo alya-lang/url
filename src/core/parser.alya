@@ -5,12 +5,8 @@ import "../types.alya"
 import "./percent.alya"
 import "./path.alya"
 
-function _url_field(modern, legacy)
-    let s = str_from_ptr(modern)
-    if len(s) > 0
-        return s
-    end
-    return str_from_ptr(legacy)
+function _url_field(f)
+    return str_from_ptr(f)
 end
 
 function url_default_port(scheme)
@@ -166,14 +162,14 @@ end
 
 function url_format(u)
     let res = ""
-    let sc = _url_field(u.scheme, u.url_scheme)
-    let un = _url_field(u.username, u.url_username)
-    let pw = _url_field(u.password, u.url_password)
-    let h = _url_field(u.host, u.url_host)
-    let p = _url_field(u.port, u.url_port)
-    let pth = _url_field(u.path, u.url_path)
-    let q = _url_field(u.query, u.url_query)
-    let frag = _url_field(u.fragment, u.url_fragment)
+    let sc = _url_field(u.scheme)
+    let un = _url_field(u.username)
+    let pw = _url_field(u.password)
+    let h = _url_field(u.host)
+    let p = _url_field(u.port)
+    let pth = _url_field(u.path)
+    let q = _url_field(u.query)
+    let frag = _url_field(u.fragment)
 
     if len(sc) > 0
         if len(h) > 0 or pth == "/" or len(pth) == 0 or substring(pth, 0, 1) == "/"
@@ -218,9 +214,9 @@ end
 
 function url_origin(u)
     let res = ""
-    let sc = _url_field(u.scheme, u.url_scheme)
-    let h = _url_field(u.host, u.url_host)
-    let p = _url_field(u.port, u.url_port)
+    let sc = _url_field(u.scheme)
+    let h = _url_field(u.host)
+    let p = _url_field(u.port)
 
     if len(sc) > 0
         res = res + sc + "://"
@@ -233,20 +229,20 @@ function url_origin(u)
 end
 
 function url_is_https(u)
-    let sc = _url_field(u.scheme, u.url_scheme)
+    let sc = _url_field(u.scheme)
     return sc == "https"
 end
 
 function url_is_http(u)
-    let sc = _url_field(u.scheme, u.url_scheme)
+    let sc = _url_field(u.scheme)
     return sc == "http"
 end
 
 function url_effective_port(u)
-    let p = _url_field(u.port, u.url_port)
+    let p = _url_field(u.port)
     if len(p) > 0
         return p
     end
-    let sc = _url_field(u.scheme, u.url_scheme)
+    let sc = _url_field(u.scheme)
     return url_default_port(sc)
 end

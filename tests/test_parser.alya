@@ -9,7 +9,6 @@ function main()
     # 1. Full standard HTTP URL
     let u1 = url::parse("https://alice:secret@api.example.com:8443/v1/users?role=admin&active=true#section-2")
     runner_assert_str_eq(r, u1.scheme, "https", "u1.scheme is https")
-    runner_assert_str_eq(r, u1.url_scheme, "https", "legacy u1.url_scheme is https")
     runner_assert_str_eq(r, u1.username, "alice", "u1.username is alice")
     runner_assert_str_eq(r, u1.password, "secret", "u1.password is secret")
     runner_assert_str_eq(r, u1.host, "api.example.com", "u1.host is api.example.com")

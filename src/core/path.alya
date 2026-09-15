@@ -23,9 +23,6 @@ end
 # Splits a URL struct into non-empty path segments
 function url_path_segments(u)
     let p = str_from_ptr(u.path)
-    if len(p) == 0
-        p = str_from_ptr(u.url_path)
-    end
 
     let plen = len(p)
     if plen == 0

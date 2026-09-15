@@ -1,8 +1,7 @@
 # Types and data structures for url package
 # Part of the Alya Language package ecosystem (https://github.com/alya-lang)
 
-# Core URL structure supporting both modern field access (.scheme, .host, etc.)
-# and 100% backward compatibility with stdlib/url (.url_scheme, .url_host, etc.)
+# Core URL structure supporting modern WHATWG field access (.scheme, .host, etc.)
 struct Url
     scheme
     username
@@ -12,19 +11,11 @@ struct Url
     path
     query
     fragment
-    url_scheme
-    url_username
-    url_password
-    url_host
-    url_port
-    url_path
-    url_query
-    url_fragment
 end
 
-# Constructor for Url struct populating both modern and legacy fields
+# Constructor for Url struct
 function url_create(scheme = "", username = "", password = "", host = "", port = "", path = "", query = "", fragment = "")
-    return Url(scheme, username, password, host, port, path, query, fragment, scheme, username, password, host, port, path, query, fragment)
+    return Url(scheme, username, password, host, port, path, query, fragment)
 end
 
 # WHATWG-style search parameters container preserving ordered key-value pairs

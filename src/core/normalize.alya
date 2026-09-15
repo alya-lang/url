@@ -59,17 +59,14 @@ function url_normalize(raw_url)
 
     # 1. Lowercase scheme
     u.scheme = _to_lower_str(u.scheme)
-    u.url_scheme = u.scheme
 
     # 2. Lowercase host
     u.host = _to_lower_str(u.host)
-    u.url_host = u.host
 
     # 3. Strip default ports
     let def_port = url_default_port(u.scheme)
     if len(def_port) > 0 and u.port == def_port
         u.port = ""
-        u.url_port = ""
     end
 
     # 4. Normalize path: remove dot segments & uppercase percent-encoding
@@ -77,10 +74,8 @@ function url_normalize(raw_url)
         let norm_path = url_remove_dot_segments(u.path)
         norm_path = _normalize_percent_encoding(norm_path)
         u.path = norm_path
-        u.url_path = norm_path
     elif len(u.scheme) > 0
         u.path = "/"
-        u.url_path = "/"
     end
 
     # 5. Normalize query: decode unreserved percent-encoding and sort params
@@ -89,7 +84,6 @@ function url_normalize(raw_url)
         search_params_sort(sp)
         let norm_q = search_params_to_string(sp)
         u.query = norm_q
-        u.url_query = norm_q
     end
 
     return url_format(u)
