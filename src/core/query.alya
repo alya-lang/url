@@ -7,29 +7,25 @@ import "./path.alya"
 import "./parser.alya"
 
 # Formats a Map into a percent-encoded query string
-function url_format_query(m)
-    let ks = keys(m)
-    let klen = array_len(ks)
+pub function url_format_query(m)
     let out = ""
-    let i = 0
-    while i < klen
-        let k = str_from_ptr(ks[i])
-        let v = str_from_ptr(get(m, k))
-        let enc_k = url_encode(k)
-        let enc_v = url_encode(v)
+    let first = true
+    for k, v in m
+        let enc_k = url_encode(str_from_ptr(k))
+        let enc_v = url_encode(str_from_ptr(v))
         let pair = enc_k + "=" + enc_v
-        if i > 0
-            out = out + "&" + pair
+        if not first
+            out += "&" + pair
         else
             out = pair
+            first = false
         end
-        i += 1
     end
     return out
 end
 
 # Parses a query string into a Map
-function url_parse_query(query_str)
+pub function url_parse_query(query_str)
     let q = str_from_ptr(query_str)
     let qlen = len(q)
     if qlen == 0
@@ -76,24 +72,24 @@ function url_parse_query(query_str)
     return res
 end
 
-function url_get_query_param(raw_url, key)
+pub function url_get_query_param(raw_url, key)
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
-    if has(q_map, k) == 1
-        return str_from_ptr(get(q_map, k))
+    if k in q_map
+        return str_from_ptr(q_map[k])
     end
     return ""
 end
 
-function url_has_query_param(raw_url, key)
+pub function url_has_query_param(raw_url, key)
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
-    return has(q_map, k)
+    return if k in q_map then 1 else 0
 end
 
-function url_set_query_param(raw_url, key, value)
+pub function url_set_query_param(raw_url, key, value)
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
@@ -104,28 +100,22 @@ function url_set_query_param(raw_url, key, value)
     return url_format(u)
 end
 
-function url_remove_query_param(raw_url, key)
+pub function url_remove_query_param(raw_url, key)
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k_target = str_from_ptr(key)
-    let ks = keys(q_map)
-    let klen = array_len(ks)
     let new_map = {}
-    let i = 0
-    while i < klen
-        let k = str_from_ptr(ks[i])
+    for k, v in q_map
         if k != k_target
-            let v = str_from_ptr(get(q_map, k))
             new_map[k] = v
         end
-        i += 1
     end
     let nq = url_format_query(new_map)
     u.query = nq
     return url_format(u)
 end
 
-function url_append_query_param(raw_url, key, value)
+pub function url_append_query_param(raw_url, key, value)
     let u = url_parse(raw_url)
     let enc_k = url_encode(str_from_ptr(key))
     let enc_v = url_encode(str_from_ptr(value))
@@ -144,11 +134,11 @@ end
 # WHATWG-style UrlSearchParams API
 # ═══════════════════════════════════════════════════════════════
 
-function search_params_new()
+pub function search_params_new()
     return search_params_create([])
 end
 
-function search_params_from_string(query_str)
+pub function search_params_from_string(query_str)
     let q = str_from_ptr(query_str)
     let qlen = len(q)
     let entries = []
@@ -192,73 +182,52 @@ function search_params_from_string(query_str)
     return search_params_create(entries)
 end
 
-function search_params_from_map(m)
+pub function search_params_from_map(m)
     let entries = []
-    let ks = keys(m)
-    let klen = array_len(ks)
-    let i = 0
-    while i < klen
-        let k = str_from_ptr(ks[i])
-        let v = str_from_ptr(get(m, k))
-        entries.push([k, v])
-        i += 1
+    for k, v in m
+        entries.push([str_from_ptr(k), str_from_ptr(v)])
     end
     return search_params_create(entries)
 end
 
-function search_params_get(sp, key)
+pub function search_params_get(sp, key)
     let k_target = str_from_ptr(key)
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
             return str_from_ptr(pair[1])
         end
-        i += 1
     end
     return ""
 end
 
-function search_params_get_all(sp, key)
+pub function search_params_get_all(sp, key)
     let k_target = str_from_ptr(key)
     let res = []
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
             res.push(str_from_ptr(pair[1]))
         end
-        i += 1
     end
     return res
 end
 
-function search_params_has(sp, key)
+pub function search_params_has(sp, key)
     let k_target = str_from_ptr(key)
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
             return 1
         end
-        i += 1
     end
     return 0
 end
 
-function search_params_set(sp, key, value)
+pub function search_params_set(sp, key, value)
     let k_target = str_from_ptr(key)
     let v_val = str_from_ptr(value)
     let new_entries = []
-    let elen = array_len(sp.entries)
     let set_done = 0
-    let i = 0
 
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
             if set_done == 0
                 new_entries.push([k_target, v_val])
@@ -267,7 +236,6 @@ function search_params_set(sp, key, value)
         else
             new_entries.push(pair)
         end
-        i += 1
     end
 
     if set_done == 0
@@ -277,21 +245,17 @@ function search_params_set(sp, key, value)
     sp.entries = new_entries
 end
 
-function search_params_append(sp, key, value)
+pub function search_params_append(sp, key, value)
     sp.entries.push([str_from_ptr(key), str_from_ptr(value)])
 end
 
-function search_params_delete(sp, key)
+pub function search_params_delete(sp, key)
     let k_target = str_from_ptr(key)
     let new_entries = []
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         if str_from_ptr(pair[0]) != k_target
             new_entries.push(pair)
         end
-        i += 1
     end
     sp.entries = new_entries
 end
@@ -299,10 +263,7 @@ end
 function _str_cmp(s1, s2)
     let len1 = len(s1)
     let len2 = len(s2)
-    let min_len = len1
-    if len2 < min_len
-        min_len = len2
-    end
+    let min_len = if len1 < len2 then len1 else len2
     let i = 0
     while i < min_len
         let c1 = char_code_at(s1, i)
@@ -322,8 +283,8 @@ function _str_cmp(s1, s2)
     return 0
 end
 
-function search_params_sort(sp)
-    let n = array_len(sp.entries)
+pub function search_params_sort(sp)
+    let n = len(sp.entries)
     let i = 0
     while i < n
         let j = 0
@@ -341,61 +302,109 @@ function search_params_sort(sp)
     end
 end
 
-function search_params_to_string(sp)
+pub function search_params_to_string(sp)
     let out = ""
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    let first = true
+    for pair in sp.entries
         let k = url_encode(str_from_ptr(pair[0]))
         let v = url_encode(str_from_ptr(pair[1]))
         let item = k + "=" + v
-        if i > 0
-            out = out + "&" + item
+        if not first
+            out += "&" + item
         else
             out = item
+            first = false
         end
-        i += 1
     end
     return out
 end
 
-function search_params_to_map(sp)
+pub function search_params_to_map(sp)
     let m = {}
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let pair = sp.entries[i]
+    for pair in sp.entries
         let k = str_from_ptr(pair[0])
         let v = str_from_ptr(pair[1])
-        if has(m, k) == 0
+        if k not in m
             m[k] = v
         end
-        i += 1
     end
     return m
 end
 
-function search_params_keys(sp)
+pub function search_params_keys(sp)
     let res = []
     let seen = {}
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        let k = str_from_ptr(sp.entries[i][0])
-        if has(seen, k) == 0
+    for pair in sp.entries
+        let k = str_from_ptr(pair[0])
+        if k not in seen
             seen[k] = 1
             res.push(k)
         end
-        i += 1
     end
     return res
 end
 
-function search_params_len(sp)
-    return array_len(sp.entries)
+pub function search_params_len(sp)
+    return len(sp.entries)
 end
 
-function search_params_clear(sp)
+pub function search_params_clear(sp)
     sp.entries = []
+end
+
+# ═══════════════════════════════════════════════════════════════
+# Struct Methods on UrlSearchParams
+# ═══════════════════════════════════════════════════════════════
+
+pub function UrlSearchParams.get(self, key)
+    return search_params_get(self, key)
+end
+
+pub function UrlSearchParams.get_all(self, key)
+    return search_params_get_all(self, key)
+end
+
+pub function UrlSearchParams.has(self, key)
+    return search_params_has(self, key)
+end
+
+pub function UrlSearchParams.set(self, key, value)
+    search_params_set(self, key, value)
+    return self
+end
+
+pub function UrlSearchParams.append(self, key, value)
+    search_params_append(self, key, value)
+    return self
+end
+
+pub function UrlSearchParams.delete(self, key)
+    search_params_delete(self, key)
+    return self
+end
+
+pub function UrlSearchParams.sort(self)
+    search_params_sort(self)
+    return self
+end
+
+pub function UrlSearchParams.to_string(self)
+    return search_params_to_string(self)
+end
+
+pub function UrlSearchParams.to_map(self)
+    return search_params_to_map(self)
+end
+
+pub function UrlSearchParams.keys(self)
+    return search_params_keys(self)
+end
+
+pub function UrlSearchParams.len(self)
+    return search_params_len(self)
+end
+
+pub function UrlSearchParams.clear(self)
+    search_params_clear(self)
+    return self
 end

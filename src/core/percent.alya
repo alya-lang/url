@@ -1,7 +1,7 @@
 # Percent encoding and decoding (RFC 3986 / WHATWG URL)
 # Part of the Alya Language package ecosystem (https://github.com/alya-lang)
 
-function _url_is_unreserved(code)
+pub function _url_is_unreserved(code)
     if code >= 48 and code <= 57
         return 1
     elif code >= 65 and code <= 90
@@ -14,20 +14,20 @@ function _url_is_unreserved(code)
     return 0
 end
 
-function _url_hex_char(nibble)
+pub function _url_hex_char(nibble)
     if nibble < 10
         return chr(48 + nibble)
     end
     return chr(55 + nibble)
 end
 
-function _url_to_hex(code)
+pub function _url_to_hex(code)
     let hi = (code / 16) % 16
     let lo = code % 16
     return _url_hex_char(hi) + _url_hex_char(lo)
 end
 
-function _url_from_hex(ch)
+pub function _url_from_hex(ch)
     let c = ord(ch)
     if c >= 48 and c <= 57
         return c - 48
@@ -40,7 +40,7 @@ function _url_from_hex(ch)
 end
 
 # Standard RFC 3986 percent encoding for arbitrary text
-function url_encode(text)
+pub function url_encode(text)
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -48,9 +48,9 @@ function url_encode(text)
     while i < slen
         let code = char_code_at(s, i)
         if _url_is_unreserved(code) == 1
-            res = res + chr(code)
+            res += chr(code)
         else
-            res = res + "%" + _url_to_hex(code)
+            res += "%" + _url_to_hex(code)
         end
         i += 1
     end
@@ -58,7 +58,7 @@ function url_encode(text)
 end
 
 # Standard RFC 3986 percent decoding (supports '+' as space)
-function url_decode(text)
+pub function url_decode(text)
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -70,15 +70,15 @@ function url_decode(text)
             let h2 = _url_from_hex(char_at(s, i + 2))
             if h1 >= 0 and h2 >= 0
                 let code = h1 * 16 + h2
-                res = res + chr(code)
+                res += chr(code)
                 i += 2
             else
-                res = res + ch
+                res += ch
             end
         elif ch == "+"
-            res = res + " "
+            res += " "
         else
-            res = res + ch
+            res += ch
         end
         i += 1
     end
@@ -86,12 +86,12 @@ function url_decode(text)
 end
 
 # Component encoding (identical to url_encode for unreserved characters)
-function url_encode_component(text)
+pub function url_encode_component(text)
     return url_encode(text)
 end
 
 # Component decoding without transforming '+' to space
-function url_decode_component(text)
+pub function url_decode_component(text)
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -103,13 +103,13 @@ function url_decode_component(text)
             let h2 = _url_from_hex(char_at(s, i + 2))
             if h1 >= 0 and h2 >= 0
                 let code = h1 * 16 + h2
-                res = res + chr(code)
+                res += chr(code)
                 i += 2
             else
-                res = res + ch
+                res += ch
             end
         else
-            res = res + ch
+            res += ch
         end
         i += 1
     end
@@ -117,7 +117,7 @@ function url_decode_component(text)
 end
 
 # Percent-encodes path while preserving slash ('/')
-function url_encode_path(text)
+pub function url_encode_path(text)
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -126,9 +126,9 @@ function url_encode_path(text)
         let ch = char_at(s, i)
         let code = char_code_at(s, i)
         if ch == "/" or _url_is_unreserved(code) == 1
-            res = res + ch
+            res += ch
         else
-            res = res + "%" + _url_to_hex(code)
+            res += "%" + _url_to_hex(code)
         end
         i += 1
     end

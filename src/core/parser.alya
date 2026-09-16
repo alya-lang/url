@@ -9,49 +9,36 @@ function _url_field(f)
     return str_from_ptr(f)
 end
 
-function url_default_port(scheme)
+pub function url_default_port(scheme)
     let s = str_from_ptr(scheme)
-    if s == "http" or s == "ws"
-        return "80"
-    elif s == "https" or s == "wss"
-        return "443"
-    elif s == "ftp"
-        return "21"
-    elif s == "ssh" or s == "sftp"
-        return "22"
-    elif s == "telnet"
-        return "23"
-    elif s == "smtp"
-        return "25"
-    elif s == "dns"
-        return "53"
-    elif s == "pop3"
-        return "110"
-    elif s == "imap"
-        return "143"
-    elif s == "ldap"
-        return "389"
-    elif s == "redis"
-        return "6379"
-    elif s == "postgres" or s == "postgresql"
-        return "5432"
-    elif s == "mysql"
-        return "3306"
-    elif s == "mongodb"
-        return "27017"
+    when s
+        is "http", "ws" then return "80"
+        is "https", "wss" then return "443"
+        is "ftp" then return "21"
+        is "ssh", "sftp" then return "22"
+        is "telnet" then return "23"
+        is "smtp" then return "25"
+        is "dns" then return "53"
+        is "pop3" then return "110"
+        is "imap" then return "143"
+        is "ldap" then return "389"
+        is "redis" then return "6379"
+        is "postgres", "postgresql" then return "5432"
+        is "mysql" then return "3306"
+        is "mongodb" then return "27017"
+        else return ""
     end
-    return ""
 end
 
-function url_is_special(scheme)
+pub function url_is_special(scheme)
     let s = str_from_ptr(scheme)
-    if s == "http" or s == "https" or s == "ws" or s == "wss" or s == "ftp" or s == "file"
-        return 1
+    when s
+        is "http", "https", "ws", "wss", "ftp", "file" then return 1
+        else return 0
     end
-    return 0
 end
 
-function url_parse(raw_url)
+pub function url_parse(raw_url)
     let s = str_from_ptr(raw_url)
     let slen = len(s)
 
@@ -160,7 +147,7 @@ function url_parse(raw_url)
     return url_create(scheme, username, password, host, port, path, query, fragment)
 end
 
-function url_format(u)
+pub function url_format(u)
     let res = ""
     let sc = _url_field(u.scheme)
     let un = _url_field(u.username)
@@ -173,76 +160,100 @@ function url_format(u)
 
     if len(sc) > 0
         if len(h) > 0 or pth == "/" or len(pth) == 0 or substring(pth, 0, 1) == "/"
-            res = res + sc + "://"
+            res += sc + "://"
         else
-            res = res + sc + ":"
+            res += sc + ":"
         end
     end
 
     if len(un) > 0
-        res = res + un
+        res += un
         if len(pw) > 0
-            res = res + ":" + pw
+            res += ":" + pw
         end
-        res = res + "@"
+        res += "@"
     end
 
-    res = res + h
+    res += h
 
     if len(p) > 0
-        res = res + ":" + p
+        res += ":" + p
     end
 
     if len(pth) > 0
-        res = res + pth
+        res += pth
     end
 
     if len(q) > 0
-        res = res + "?" + q
+        res += "?" + q
     end
 
     if len(frag) > 0
-        res = res + "#" + frag
+        res += "#" + frag
     end
 
     return res
 end
 
-function url_to_string(u)
+pub function url_to_string(u)
     return url_format(u)
 end
 
-function url_origin(u)
+pub function url_origin(u)
     let res = ""
     let sc = _url_field(u.scheme)
     let h = _url_field(u.host)
     let p = _url_field(u.port)
 
     if len(sc) > 0
-        res = res + sc + "://"
+        res += sc + "://"
     end
-    res = res + h
+    res += h
     if len(p) > 0
-        res = res + ":" + p
+        res += ":" + p
     end
     return res
 end
 
-function url_is_https(u)
+pub function url_is_https(u)
     let sc = _url_field(u.scheme)
     return sc == "https"
 end
 
-function url_is_http(u)
+pub function url_is_http(u)
     let sc = _url_field(u.scheme)
     return sc == "http"
 end
 
-function url_effective_port(u)
+pub function url_effective_port(u)
     let p = _url_field(u.port)
     if len(p) > 0
         return p
     end
     let sc = _url_field(u.scheme)
     return url_default_port(sc)
+end
+
+# ═══════════════════════════════════════════════════════════════
+# Struct Methods on Url
+# ═══════════════════════════════════════════════════════════════
+
+pub function Url.to_string(self)
+    return url_format(self)
+end
+
+pub function Url.origin(self)
+    return url_origin(self)
+end
+
+pub function Url.is_https(self)
+    return url_is_https(self)
+end
+
+pub function Url.is_http(self)
+    return url_is_http(self)
+end
+
+pub function Url.effective_port(self)
+    return url_effective_port(self)
 end

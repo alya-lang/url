@@ -53,6 +53,18 @@ function main()
     runner_assert_str_eq(r, u4.path, "/", "empty path defaults to /")
     runner_assert_str_eq(r, url::format(u4), "http://example.org/", "formatted with root path")
 
+    # 5. v0.0.18 Struct Methods: Url.to_string and UrlBuilder methods
+    let b5 = url::builder()
+    b5.scheme("https")
+    b5.host("api.alya.lang")
+    b5.path("/v1/items")
+    b5.param("format", "json")
+    let u5 = b5.build()
+    runner_assert_str_eq(r, u5.to_string(), "https://api.alya.lang/v1/items?format=json", "u5.to_string() method")
+    runner_assert_str_eq(r, u5.origin(), "https://api.alya.lang", "u5.origin() method")
+    runner_assert_eq(r, u5.is_https(), true, "u5.is_https() method")
+    runner_assert_eq(r, url::UrlScheme.HTTPS, 2, "UrlScheme.HTTPS enum")
+
     let failed = runner_summary(r)
     if failed > 0
         exit(1)

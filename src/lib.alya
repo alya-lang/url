@@ -10,45 +10,45 @@ import "./core/builder.alya"
 import "./core/normalize.alya"
 
 # ═══════════════════════════════════════════════════════════════
-# High-Level Idiomatic API
+# High-Level Idiomatic Public API
 # ═══════════════════════════════════════════════════════════════
 
 # Parse a URL string into a Url struct
-function parse(raw_url)
+pub function parse(raw_url)
     return url_parse(raw_url)
 end
 
 # Format a Url struct into a URL string
-function format(u)
+pub function format(u)
     return url_format(u)
 end
 
 # Convert a Url struct to string
-function to_string(u)
+pub function to_string(u)
     return url_format(u)
 end
 
 # Create a new fluent URL builder
-function builder()
+pub function builder()
     return url_builder()
 end
 
 # Create a new empty UrlSearchParams container
-function search_params()
+pub function search_params()
     return search_params_new()
 end
 
 # Create UrlSearchParams from a query string
-function search_params_from(query_str)
+pub function search_params_from(query_str)
     return search_params_from_string(query_str)
 end
 
 # Normalize a URL string
-function normalize(raw_url)
+pub function normalize(raw_url)
     return url_normalize(raw_url)
 end
 
 # Resolve a relative URL or path against a base URL
-function join(base, relative)
+pub function join(base, relative)
     return url_join(base, relative)
 end

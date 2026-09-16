@@ -7,11 +7,11 @@ import "./path.alya"
 import "./parser.alya"
 import "./query.alya"
 
-function url_builder()
+pub function url_builder()
     return url_builder_create()
 end
 
-function builder_from_url(u)
+pub function builder_from_url(u)
     let b = url_builder_create()
     b.b_scheme = str_from_ptr(u.scheme)
     b.b_username = str_from_ptr(u.username)
@@ -26,76 +26,72 @@ function builder_from_url(u)
     return b
 end
 
-function builder_from_string(raw_url)
+pub function builder_from_string(raw_url)
     let u = url_parse(raw_url)
     return builder_from_url(u)
 end
 
-function builder_scheme(b, scheme)
+pub function builder_scheme(b, scheme)
     b.b_scheme = str_from_ptr(scheme)
     return b
 end
 
-function builder_credentials(b, username, password)
+pub function builder_credentials(b, username, password)
     b.b_username = str_from_ptr(username)
     b.b_password = str_from_ptr(password)
     return b
 end
 
-function builder_username(b, username)
+pub function builder_username(b, username)
     b.b_username = str_from_ptr(username)
     return b
 end
 
-function builder_password(b, password)
+pub function builder_password(b, password)
     b.b_password = str_from_ptr(password)
     return b
 end
 
-function builder_host(b, host)
+pub function builder_host(b, host)
     b.b_host = str_from_ptr(host)
     return b
 end
 
-function builder_port(b, port)
+pub function builder_port(b, port)
     b.b_port = str_from_ptr(port)
     return b
 end
 
-function builder_path(b, path)
+pub function builder_path(b, path)
     b.b_path = str_from_ptr(path)
     return b
 end
 
-function builder_append_path(b, segment)
+pub function builder_append_path(b, segment)
     let s = str_from_ptr(segment)
     b.b_path = url_join_path(b.b_path, s)
     return b
 end
 
-function builder_param(b, key, value)
-    let p = b.b_params
-    p.push([str_from_ptr(key), str_from_ptr(value)])
+pub function builder_param(b, key, value)
+    b.b_params.push([str_from_ptr(key), str_from_ptr(value)])
     return b
 end
 
-function builder_query(b, query_str)
+pub function builder_query(b, query_str)
     let sp = search_params_from_string(query_str)
-    let elen = array_len(sp.entries)
-    let i = 0
-    while i < elen
-        b.b_params.push(sp.entries[i])
-        i += 1
+    for entry in sp.entries
+        b.b_params.push(entry)
     end
     return b
 end
 
-function builder_fragment(b, fragment)
+pub function builder_fragment(b, fragment)
     b.b_fragment = str_from_ptr(fragment)
     return b
 end
 
-function builder_build(b)
+pub function builder_build(b)
     let sp = search_params_create(b.b_params)
     let q_str = search_params_to_string(sp)
     let pth = b.b_path
@@ -105,7 +101,63 @@ function builder_build(b)
     return url_create(b.b_scheme, b.b_username, b.b_password, b.b_host, b.b_port, pth, q_str, b.b_fragment)
 end
 
-function builder_to_string(b)
+pub function builder_to_string(b)
     let u = builder_build(b)
     return url_format(u)
+end
+
+# ═══════════════════════════════════════════════════════════════
+# Struct Methods on UrlBuilder
+# ═══════════════════════════════════════════════════════════════
+
+pub function UrlBuilder.scheme(self, s)
+    return builder_scheme(self, s)
+end
+
+pub function UrlBuilder.credentials(self, u, p)
+    return builder_credentials(self, u, p)
+end
+
+pub function UrlBuilder.username(self, u)
+    return builder_username(self, u)
+end
+
+pub function UrlBuilder.password(self, p)
+    return builder_password(self, p)
+end
+
+pub function UrlBuilder.host(self, h)
+    return builder_host(self, h)
+end
+
+pub function UrlBuilder.port(self, p)
+    return builder_port(self, p)
+end
+
+pub function UrlBuilder.path(self, p)
+    return builder_path(self, p)
+end
+
+pub function UrlBuilder.append_path(self, seg)
+    return builder_append_path(self, seg)
+end
+
+pub function UrlBuilder.param(self, k, v)
+    return builder_param(self, k, v)
+end
+
+pub function UrlBuilder.query(self, q)
+    return builder_query(self, q)
+end
+
+pub function UrlBuilder.fragment(self, f)
+    return builder_fragment(self, f)
+end
+
+pub function UrlBuilder.build(self)
+    return builder_build(self)
+end
+
+pub function UrlBuilder.to_string(self)
+    return builder_to_string(self)
 end

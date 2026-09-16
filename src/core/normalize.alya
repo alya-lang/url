@@ -15,9 +15,9 @@ function _to_lower_str(s)
         let ch = char_at(s, i)
         let c = ord(ch)
         if c >= 65 and c <= 90
-            res = res + chr(c + 32)
+            res += chr(c + 32)
         else
-            res = res + ch
+            res += ch
         end
         i += 1
     end
@@ -37,16 +37,16 @@ function _normalize_percent_encoding(s)
             if h1 >= 0 and h2 >= 0
                 let code = h1 * 16 + h2
                 if _url_is_unreserved(code) == 1
-                    res = res + chr(code)
+                    res += chr(code)
                 else
-                    res = res + "%" + _url_to_hex(code)
+                    res += "%" + _url_to_hex(code)
                 end
                 i += 2
             else
-                res = res + ch
+                res += ch
             end
         else
-            res = res + ch
+            res += ch
         end
         i += 1
     end
@@ -54,7 +54,7 @@ function _normalize_percent_encoding(s)
 end
 
 # Fully normalizes a raw URL per RFC 3986 Section 6
-function url_normalize(raw_url)
+pub function url_normalize(raw_url)
     let u = url_parse(raw_url)
 
     # 1. Lowercase scheme

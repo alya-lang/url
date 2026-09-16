@@ -1,44 +1,54 @@
 # Types and data structures for url package
 # Part of the Alya Language package ecosystem (https://github.com/alya-lang)
 
+# Public URL scheme enumeration
+pub enum UrlScheme
+    HTTP = 1,
+    HTTPS = 2,
+    WS = 3,
+    WSS = 4,
+    FTP = 5,
+    FILE = 6
+end
+
 # Core URL structure supporting modern WHATWG field access (.scheme, .host, etc.)
-struct Url
-    scheme
-    username
-    password
-    host
-    port
-    path
-    query
+pub struct Url
+    scheme,
+    username,
+    password,
+    host,
+    port,
+    path,
+    query,
     fragment
 end
 
 # Constructor for Url struct
-function url_create(scheme = "", username = "", password = "", host = "", port = "", path = "", query = "", fragment = "")
+pub function url_create(scheme = "", username = "", password = "", host = "", port = "", path = "", query = "", fragment = "")
     return Url(scheme, username, password, host, port, path, query, fragment)
 end
 
 # WHATWG-style search parameters container preserving ordered key-value pairs
-struct UrlSearchParams
+pub struct UrlSearchParams
     entries
 end
 
-function search_params_create(entries = [])
+pub function search_params_create(entries = [])
     return UrlSearchParams(entries)
 end
 
 # Fluent URL Builder structure
-struct UrlBuilder
-    b_scheme
-    b_username
-    b_password
-    b_host
-    b_port
-    b_path
-    b_params
+pub struct UrlBuilder
+    b_scheme,
+    b_username,
+    b_password,
+    b_host,
+    b_port,
+    b_path,
+    b_params,
     b_fragment
 end
 
-function url_builder_create()
+pub function url_builder_create()
     return UrlBuilder("", "", "", "", "", "", [], "")
 end

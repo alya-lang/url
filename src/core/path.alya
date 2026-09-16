@@ -4,7 +4,7 @@
 import "../types.alya"
 import "./percent.alya"
 
-function _url_find(s, target, start_idx)
+pub function _url_find(s, target, start_idx)
     let slen = len(s)
     let tlen = len(target)
     if tlen == 0
@@ -21,29 +21,25 @@ function _url_find(s, target, start_idx)
 end
 
 # Splits a URL struct into non-empty path segments
-function url_path_segments(u)
+pub function url_path_segments(u)
     let p = str_from_ptr(u.path)
-
     let plen = len(p)
     if plen == 0
         return []
     end
     let raw_segs = split(p, "/")
     let res = []
-    let slen = array_len(raw_segs)
-    let i = 0
-    while i < slen
-        let seg = str_from_ptr(raw_segs[i])
-        if len(seg) > 0
-            res.push(seg)
+    for seg in raw_segs
+        let s_seg = str_from_ptr(seg)
+        if len(s_seg) > 0
+            res.push(s_seg)
         end
-        i += 1
     end
     return res
 end
 
 # RFC 3986 Section 5.2.4: Remove Dot Segments algorithm
-function url_remove_dot_segments(path)
+pub function url_remove_dot_segments(path)
     let p = str_from_ptr(path)
     let plen = len(p)
     if plen == 0
@@ -62,29 +58,23 @@ function url_remove_dot_segments(path)
 
     let raw_segs = split(p, "/")
     let stack = []
-    let slen = array_len(raw_segs)
-    let i = 0
 
-    while i < slen
-        let seg = str_from_ptr(raw_segs[i])
-        if seg == "" or seg == "."
+    for seg in raw_segs
+        let s_seg = str_from_ptr(seg)
+        if s_seg == "" or s_seg == "."
             # ignore empty or current directory
-        elif seg == ".."
-            if array_len(stack) > 0
+        elif s_seg == ".."
+            if len(stack) > 0
                 stack.pop()
             end
         else
-            stack.push(seg)
+            stack.push(s_seg)
         end
-        i += 1
     end
 
     let out = ""
-    let stlen = array_len(stack)
-    let j = 0
-    while j < stlen
-        out = out + "/" + str_from_ptr(stack[j])
-        j += 1
+    for item in stack
+        out += "/" + str_from_ptr(item)
     end
 
     if len(out) == 0
@@ -99,14 +89,14 @@ function url_remove_dot_segments(path)
     end
 
     if should_end_slash == 1 and char_at(out, len(out) - 1) != "/"
-        out = out + "/"
+        out += "/"
     end
 
     return out
 end
 
 # Joins two path strings without duplicate slashes
-function url_join_path(base_path, rel_path)
+pub function url_join_path(base_path, rel_path)
     let b = str_from_ptr(base_path)
     let r = str_from_ptr(rel_path)
     let blen = len(b)
@@ -132,7 +122,7 @@ function url_join_path(base_path, rel_path)
 end
 
 # Resolves a relative URL against a base URL (RFC 3986 Section 5)
-function url_join(base, relative)
+pub function url_join(base, relative)
     let b = str_from_ptr(base)
     let r = str_from_ptr(relative)
     let blen = len(b)
