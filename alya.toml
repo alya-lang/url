@@ -1,7 +1,7 @@
 [package]
 name = "url"
-version = "0.3.0"
-alya-version = "0.0.12"
+version = "0.4.0"
+alya-version = "0.0.17"
 entry = "src/lib.alya"
 description = "WHATWG and RFC 3986 compliant URL parser, serializer, and query string library for Alya"
 authors = ["Alya Language Contributors <https://github.com/alya-lang>"]
