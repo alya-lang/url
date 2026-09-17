@@ -147,7 +147,7 @@ pub function url_parse(raw_url)
     return url_create(scheme, username, password, host, port, path, query, fragment)
 end
 
-pub function url_format(u)
+pub function url_format(u: Url)
     let res = ""
     let sc = _url_field(u.scheme)
     let un = _url_field(u.username)
@@ -195,11 +195,11 @@ pub function url_format(u)
     return res
 end
 
-pub function url_to_string(u)
+pub function url_to_string(u: Url)
     return url_format(u)
 end
 
-pub function url_origin(u)
+pub function url_origin(u: Url)
     let res = ""
     let sc = _url_field(u.scheme)
     let h = _url_field(u.host)
@@ -215,17 +215,17 @@ pub function url_origin(u)
     return res
 end
 
-pub function url_is_https(u)
+pub function url_is_https(u: Url)
     let sc = _url_field(u.scheme)
     return sc == "https"
 end
 
-pub function url_is_http(u)
+pub function url_is_http(u: Url)
     let sc = _url_field(u.scheme)
     return sc == "http"
 end
 
-pub function url_effective_port(u)
+pub function url_effective_port(u: Url)
     let p = _url_field(u.port)
     if len(p) > 0
         return p
@@ -238,22 +238,22 @@ end
 # Struct Methods on Url
 # ═══════════════════════════════════════════════════════════════
 
-pub function Url.to_string(self)
+pub function Url.to_string(self: Url)
     return url_format(self)
 end
 
-pub function Url.origin(self)
+pub function Url.origin(self: Url)
     return url_origin(self)
 end
 
-pub function Url.is_https(self)
+pub function Url.is_https(self: Url)
     return url_is_https(self)
 end
 
-pub function Url.is_http(self)
+pub function Url.is_http(self: Url)
     return url_is_http(self)
 end
 
-pub function Url.effective_port(self)
+pub function Url.effective_port(self: Url)
     return url_effective_port(self)
 end
