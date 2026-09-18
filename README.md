@@ -63,8 +63,8 @@ url = { git = "https://github.com/alya-lang/url", branch = "main" }
 Or install it directly using the Alya package CLI:
 
 ```bash
-alyac add url --git https://github.com/alya-lang/url --branch main
-alyac install
+alya add url --git https://github.com/alya-lang/url --branch main
+alya install
 ```
 
 ---
@@ -245,33 +245,33 @@ main()
 
 ## 🧪 Running Tests & Benchmarks
 
-Run the test suite using `alyac`:
+Run the test suite using `alya`:
 
 ```bash
-alyac test
+alya test
 ```
 
 Run individual test files:
 
 ```bash
-alyac run tests/test_parser.alya
-alyac run tests/test_percent.alya
-alyac run tests/test_path.alya
-alyac run tests/test_query.alya
-alyac run tests/test_builder.alya
-alyac run tests/test_normalize.alya
+alya run tests/test_parser.alya
+alya run tests/test_percent.alya
+alya run tests/test_path.alya
+alya run tests/test_query.alya
+alya run tests/test_builder.alya
+alya run tests/test_normalize.alya
 ```
 
 Run benchmarks:
 
 ```bash
-alyac run benches/bench_basic.alya
+alya run benches/bench_basic.alya
 ```
 
 Run the example showcase:
 
 ```bash
-alyac run examples/demo.alya
+alya run examples/demo.alya
 ```
 
 ---
@@ -283,13 +283,13 @@ Contributions are welcome! Please follow these steps:
 1. Fork the repository and clone it locally
 2. Install dependencies:
    ```bash
-   alyac install
+   alya install
    ```
 3. Create your feature branch (`git checkout -b feature/my-feature`)
 4. Verify tests and formatting before opening a PR:
    ```bash
-   alyac test
-   alyac fmt . --check
+   alya test
+   alya fmt . --check
    ```
 5. Commit your changes (`git commit -m "feat: add feature"`) and open a Pull Request
 
