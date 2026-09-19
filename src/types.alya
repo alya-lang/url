@@ -30,10 +30,10 @@ end
 
 # WHATWG-style search parameters container preserving ordered key-value pairs
 pub struct UrlSearchParams
-    entries
+    entries: Any[]
 end
 
-pub function search_params_create(entries = [])
+pub function search_params_create(entries: Any[] = [])
     return UrlSearchParams(entries)
 end
 

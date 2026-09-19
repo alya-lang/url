@@ -22,7 +22,9 @@ pub function builder_from_url(u)
     b.b_fragment = str_from_ptr(u.fragment)
 
     let sp = search_params_from_string(str_from_ptr(u.query))
-    b.b_params = sp.entries
+    for entry in sp.entries
+        b.b_params.push([str_from_ptr(entry[0]), str_from_ptr(entry[1])])
+    end
     return b
 end
 
