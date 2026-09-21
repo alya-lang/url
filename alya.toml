@@ -11,3 +11,7 @@ repository = "https://github.com/alya-lang/url"
 keywords = ["alya", "alya-lang", "package", "url", "uri", "parser", "whatwg", "query-string", "networking"]
 
 [dependencies]
+
+# [lint]
+# disabled_rules = []
+# exclude = []
