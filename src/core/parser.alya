@@ -1,15 +1,39 @@
-# URL Parsing and formatting (RFC 3986 / WHATWG URL)
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/parser
+##
+## URL parsing and formatting (RFC 3986 / WHATWG URL).
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
+##
+## Splits raw URLs into authority, userinfo, host, port, path, query, and
+## fragment components, and formats structs back into URL strings.
 
 import "../types.alya"
 import "./percent.alya"
 import "./path.alya"
 
-function _url_field(f)
+## Coerces a possibly foreign string field into a native string.
+##
+## ### Parameters
+## - `f`: Field value.
+##
+## ### Returns
+## The native string form.
+pub function _url_field(f) -> string
     return str_from_ptr(f)
 end
 
-pub function url_default_port(scheme)
+## Returns the default port string for a well-known scheme.
+##
+## ### Parameters
+## - `scheme`: Scheme value.
+##
+## ### Returns
+## The default port string (empty when unknown).
+##
+## ### Examples
+## ```alya
+## say url_default_port("https") # "443"
+## ```
+pub function url_default_port(scheme) -> string
     let s = str_from_ptr(scheme)
     when s
         is "http", "ws" then return "80"
@@ -30,7 +54,14 @@ pub function url_default_port(scheme)
     end
 end
 
-pub function url_is_special(scheme)
+## Checks whether a scheme uses special authority semantics.
+##
+## ### Parameters
+## - `scheme`: Scheme value.
+##
+## ### Returns
+## `1` for `http`, `https`, `ws`, `wss`, `ftp`, and `file`; `0` otherwise.
+pub function url_is_special(scheme) -> int
     let s = str_from_ptr(scheme)
     when s
         is "http", "https", "ws", "wss", "ftp", "file" then return 1
@@ -38,7 +69,22 @@ pub function url_is_special(scheme)
     end
 end
 
-pub function url_parse(raw_url)
+## Parses a raw URL string into a `Url` struct.
+##
+## Handles hierarchical (`https://h/p`), opaque (`mailto:x`), IPv6 hosts,
+## userinfo, ports, queries, and fragments.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+##
+## ### Returns
+## The parsed `Url` instance.
+##
+## ### Examples
+## ```alya
+## let u = url_parse("https://user:pw@h:8080/p?q=1#frag")
+## ```
+pub function url_parse(raw_url) -> Url
     let s = str_from_ptr(raw_url)
     let slen = len(s)
 
@@ -147,7 +193,14 @@ pub function url_parse(raw_url)
     return url_create(scheme, username, password, host, port, path, query, fragment)
 end
 
-pub function url_format(u: Url)
+## Formats a `Url` struct into a URL string.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The formatted URL string.
+pub function url_format(u: Url) -> string
     let res = ""
     let sc = _url_field(u.scheme)
     let un = _url_field(u.username)
@@ -160,16 +213,16 @@ pub function url_format(u: Url)
 
     if len(sc) > 0
         if len(h) > 0 or pth == "/" or len(pth) == 0 or substring(pth, 0, 1) == "/"
-            res += sc + "://"
+            res += "{sc}://"
         else
-            res += sc + ":"
+            res += "{sc}:"
         end
     end
 
     if len(un) > 0
         res += un
         if len(pw) > 0
-            res += ":" + pw
+            res += ":{pw}"
         end
         res += "@"
     end
@@ -177,7 +230,7 @@ pub function url_format(u: Url)
     res += h
 
     if len(p) > 0
-        res += ":" + p
+        res += ":{p}"
     end
 
     if len(pth) > 0
@@ -185,47 +238,82 @@ pub function url_format(u: Url)
     end
 
     if len(q) > 0
-        res += "?" + q
+        res += "?{q}"
     end
 
     if len(frag) > 0
-        res += "#" + frag
+        res += "#{frag}"
     end
 
     return res
 end
 
-pub function url_to_string(u: Url)
+## Alias for `url_format`.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The formatted URL string.
+pub function url_to_string(u: Url) -> string
     return url_format(u)
 end
 
-pub function url_origin(u: Url)
+## Formats the `scheme://host:port` origin of a `Url`.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The origin string.
+pub function url_origin(u: Url) -> string
     let res = ""
     let sc = _url_field(u.scheme)
     let h = _url_field(u.host)
     let p = _url_field(u.port)
 
     if len(sc) > 0
-        res += sc + "://"
+        res += "{sc}://"
     end
     res += h
     if len(p) > 0
-        res += ":" + p
+        res += ":{p}"
     end
     return res
 end
 
-pub function url_is_https(u: Url)
+## Checks whether a `Url` uses the `https` scheme.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## `1` for HTTPS, `0` otherwise.
+pub function url_is_https(u: Url) -> int
     let sc = _url_field(u.scheme)
     return sc == "https"
 end
 
-pub function url_is_http(u: Url)
+## Checks whether a `Url` uses the `http` scheme.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## `1` for HTTP, `0` otherwise.
+pub function url_is_http(u: Url) -> int
     let sc = _url_field(u.scheme)
     return sc == "http"
 end
 
-pub function url_effective_port(u: Url)
+## Returns the explicit port, falling back to the scheme default.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The port string.
+pub function url_effective_port(u: Url) -> string
     let p = _url_field(u.port)
     if len(p) > 0
         return p
@@ -238,22 +326,57 @@ end
 # Struct Methods on Url
 # ═══════════════════════════════════════════════════════════════
 
-pub function Url.to_string(self: Url)
+## Formats this URL into a URL string.
+##
+## ### Parameters
+## - `self`: The target `Url` instance.
+##
+## ### Returns
+## The formatted URL string.
+pub function Url.to_string(self: Url) -> string
     return url_format(self)
 end
 
-pub function Url.origin(self: Url)
+## Formats the `scheme://host:port` origin of this URL.
+##
+## ### Parameters
+## - `self`: The target `Url` instance.
+##
+## ### Returns
+## The origin string.
+pub function Url.origin(self: Url) -> string
     return url_origin(self)
 end
 
-pub function Url.is_https(self: Url)
+## Checks whether this URL uses the `https` scheme.
+##
+## ### Parameters
+## - `self`: The target `Url` instance.
+##
+## ### Returns
+## `1` for HTTPS, `0` otherwise.
+pub function Url.is_https(self: Url) -> int
     return url_is_https(self)
 end
 
-pub function Url.is_http(self: Url)
+## Checks whether this URL uses the `http` scheme.
+##
+## ### Parameters
+## - `self`: The target `Url` instance.
+##
+## ### Returns
+## `1` for HTTP, `0` otherwise.
+pub function Url.is_http(self: Url) -> int
     return url_is_http(self)
 end
 
-pub function Url.effective_port(self: Url)
+## Returns the explicit port, falling back to the scheme default.
+##
+## ### Parameters
+## - `self`: The target `Url` instance.
+##
+## ### Returns
+## The port string.
+pub function Url.effective_port(self: Url) -> string
     return url_effective_port(self)
 end

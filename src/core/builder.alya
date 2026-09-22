@@ -1,5 +1,7 @@
-# Fluent URL Builder implementation
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/builder
+##
+## Fluent URL builder implementation.
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
 import "../types.alya"
 import "./percent.alya"
@@ -7,11 +9,22 @@ import "./path.alya"
 import "./parser.alya"
 import "./query.alya"
 
-pub function url_builder()
+## Creates a new empty fluent URL builder.
+##
+## ### Returns
+## The new `UrlBuilder` instance.
+pub function url_builder() -> UrlBuilder
     return url_builder_create()
 end
 
-pub function builder_from_url(u)
+## Seeds a builder from a parsed `Url` struct.
+##
+## ### Parameters
+## - `u`: Source `Url` instance.
+##
+## ### Returns
+## The seeded `UrlBuilder` instance.
+pub function builder_from_url(u: Url) -> UrlBuilder
     let b = url_builder_create()
     b.b_scheme = str_from_ptr(u.scheme)
     b.b_username = str_from_ptr(u.username)
@@ -28,59 +41,148 @@ pub function builder_from_url(u)
     return b
 end
 
-pub function builder_from_string(raw_url)
+## Seeds a builder by parsing a raw URL string.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+##
+## ### Returns
+## The seeded `UrlBuilder` instance.
+pub function builder_from_string(raw_url) -> UrlBuilder
     let u = url_parse(raw_url)
     return builder_from_url(u)
 end
 
-pub function builder_scheme(b, scheme)
+## Sets the builder scheme, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `scheme`: Scheme value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_scheme(b: UrlBuilder, scheme) -> UrlBuilder
     b.b_scheme = str_from_ptr(scheme)
     return b
 end
 
-pub function builder_credentials(b, username, password)
+## Sets builder credentials, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `username`: Username value.
+## - `password`: Password value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_credentials(b: UrlBuilder, username, password) -> UrlBuilder
     b.b_username = str_from_ptr(username)
     b.b_password = str_from_ptr(password)
     return b
 end
 
-pub function builder_username(b, username)
+## Sets the builder username, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `username`: Username value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_username(b: UrlBuilder, username) -> UrlBuilder
     b.b_username = str_from_ptr(username)
     return b
 end
 
-pub function builder_password(b, password)
+## Sets the builder password, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `password`: Password value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_password(b: UrlBuilder, password) -> UrlBuilder
     b.b_password = str_from_ptr(password)
     return b
 end
 
-pub function builder_host(b, host)
+## Sets the builder host, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `host`: Host value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_host(b: UrlBuilder, host) -> UrlBuilder
     b.b_host = str_from_ptr(host)
     return b
 end
 
-pub function builder_port(b, port)
+## Sets the builder port, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `port`: Port value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_port(b: UrlBuilder, port) -> UrlBuilder
     b.b_port = str_from_ptr(port)
     return b
 end
 
-pub function builder_path(b, path)
+## Sets the builder path, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `path`: Path value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_path(b: UrlBuilder, path) -> UrlBuilder
     b.b_path = str_from_ptr(path)
     return b
 end
 
-pub function builder_append_path(b, segment)
+## Appends a segment to the builder path, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `segment`: Path segment value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_append_path(b: UrlBuilder, segment) -> UrlBuilder
     let s = str_from_ptr(segment)
     b.b_path = url_join_path(b.b_path, s)
     return b
 end
 
-pub function builder_param(b, key, value)
+## Appends a query parameter, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `key`: Parameter key value.
+## - `value`: Parameter value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_param(b: UrlBuilder, key, value) -> UrlBuilder
     b.b_params.push([str_from_ptr(key), str_from_ptr(value)])
     return b
 end
 
-pub function builder_query(b, query_str)
+## Merges a query string into the builder, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `query_str`: Raw query value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_query(b: UrlBuilder, query_str) -> UrlBuilder
     let sp = search_params_from_string(query_str)
     for entry in sp.entries
         b.b_params.push(entry)
@@ -88,12 +190,27 @@ pub function builder_query(b, query_str)
     return b
 end
 
-pub function builder_fragment(b, fragment)
+## Sets the builder fragment, returning the updated builder.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+## - `fragment`: Fragment value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function builder_fragment(b: UrlBuilder, fragment) -> UrlBuilder
     b.b_fragment = str_from_ptr(fragment)
     return b
 end
 
-pub function builder_build(b)
+## Builds a `Url` struct from the builder state.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+##
+## ### Returns
+## The built `Url` instance.
+pub function builder_build(b: UrlBuilder) -> Url
     let sp = search_params_create(b.b_params)
     let q_str = search_params_to_string(sp)
     let pth = b.b_path
@@ -103,7 +220,14 @@ pub function builder_build(b)
     return url_create(b.b_scheme, b.b_username, b.b_password, b.b_host, b.b_port, pth, q_str, b.b_fragment)
 end
 
-pub function builder_to_string(b)
+## Builds and formats the builder state into a URL string.
+##
+## ### Parameters
+## - `b`: Target `UrlBuilder` instance.
+##
+## ### Returns
+## The built URL string.
+pub function builder_to_string(b: UrlBuilder) -> string
     let u = builder_build(b)
     return url_format(u)
 end
@@ -112,54 +236,158 @@ end
 # Struct Methods on UrlBuilder
 # ═══════════════════════════════════════════════════════════════
 
-pub function UrlBuilder.scheme(self, s)
+## Sets the scheme, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `s`: Scheme value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.scheme(self: UrlBuilder, s) -> UrlBuilder
     return builder_scheme(self, s)
 end
 
-pub function UrlBuilder.credentials(self, u, p)
+## Sets credentials, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `u`: Username value.
+## - `p`: Password value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.credentials(self: UrlBuilder, u, p) -> UrlBuilder
     return builder_credentials(self, u, p)
 end
 
-pub function UrlBuilder.username(self, u)
+## Sets the username, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `u`: Username value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.username(self: UrlBuilder, u) -> UrlBuilder
     return builder_username(self, u)
 end
 
-pub function UrlBuilder.password(self, p)
+## Sets the password, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `p`: Password value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.password(self: UrlBuilder, p) -> UrlBuilder
     return builder_password(self, p)
 end
 
-pub function UrlBuilder.host(self, h)
+## Sets the host, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `h`: Host value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.host(self: UrlBuilder, h) -> UrlBuilder
     return builder_host(self, h)
 end
 
-pub function UrlBuilder.port(self, p)
+## Sets the port, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `p`: Port value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.port(self: UrlBuilder, p) -> UrlBuilder
     return builder_port(self, p)
 end
 
-pub function UrlBuilder.path(self, p)
+## Sets the path, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `p`: Path value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.path(self: UrlBuilder, p) -> UrlBuilder
     return builder_path(self, p)
 end
 
-pub function UrlBuilder.append_path(self, seg)
+## Appends a segment, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `seg`: Path segment value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.append_path(self: UrlBuilder, seg) -> UrlBuilder
     return builder_append_path(self, seg)
 end
 
-pub function UrlBuilder.param(self, k, v)
+## Appends a query parameter, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `k`: Parameter key value.
+## - `v`: Parameter value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.param(self: UrlBuilder, k, v) -> UrlBuilder
     return builder_param(self, k, v)
 end
 
-pub function UrlBuilder.query(self, q)
+## Merges a query string, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `q`: Raw query value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.query(self: UrlBuilder, q) -> UrlBuilder
     return builder_query(self, q)
 end
 
-pub function UrlBuilder.fragment(self, f)
+## Sets the fragment, returning the updated builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+## - `f`: Fragment value.
+##
+## ### Returns
+## The updated `UrlBuilder` instance.
+pub function UrlBuilder.fragment(self: UrlBuilder, f) -> UrlBuilder
     return builder_fragment(self, f)
 end
 
-pub function UrlBuilder.build(self)
+## Builds a `Url` struct from this builder.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+##
+## ### Returns
+## The built `Url` instance.
+pub function UrlBuilder.build(self: UrlBuilder) -> Url
     return builder_build(self)
 end
 
-pub function UrlBuilder.to_string(self)
+## Builds and formats this builder into a URL string.
+##
+## ### Parameters
+## - `self`: The target `UrlBuilder` instance.
+##
+## ### Returns
+## The built URL string.
+pub function UrlBuilder.to_string(self: UrlBuilder) -> string
     return builder_to_string(self)
 end

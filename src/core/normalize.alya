@@ -1,5 +1,7 @@
-# URL Normalization (RFC 3986 Section 6)
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/normalize
+##
+## URL normalization (RFC 3986 Section 6).
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
 import "../types.alya"
 import "./percent.alya"
@@ -7,7 +9,8 @@ import "./path.alya"
 import "./parser.alya"
 import "./query.alya"
 
-function _to_lower_str(s)
+# Lowercases ASCII uppercase letters in a string.
+function _to_lower_str(s: string) -> string
     let slen = len(s)
     let res = ""
     let i = 0
@@ -24,8 +27,8 @@ function _to_lower_str(s)
     return res
 end
 
-# Normalizes percent-encoding: decodes unreserved chars, uppercases hex digits
-function _normalize_percent_encoding(s)
+# Normalizes percent-encoding: decodes unreserved chars, uppercases hex digits.
+function _normalize_percent_encoding(s: string) -> string
     let slen = len(s)
     let res = ""
     let i = 0
@@ -39,7 +42,8 @@ function _normalize_percent_encoding(s)
                 if _url_is_unreserved(code) == 1
                     res += chr(code)
                 else
-                    res += "%" + _url_to_hex(code)
+                    let hex = _url_to_hex(code)
+                    res += "%{hex}"
                 end
                 i += 2
             else
@@ -53,8 +57,22 @@ function _normalize_percent_encoding(s)
     return res
 end
 
-# Fully normalizes a raw URL per RFC 3986 Section 6
-pub function url_normalize(raw_url)
+## Fully normalizes a raw URL per RFC 3986 Section 6.
+##
+## Lowercases scheme and host, strips default ports, normalizes dot
+## segments and percent-encoding, and sorts query parameters.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+##
+## ### Returns
+## The normalized URL string.
+##
+## ### Examples
+## ```alya
+## say url_normalize("HTTP://H:80/a/../b") # "http://h/b"
+## ```
+pub function url_normalize(raw_url) -> string
     let u = url_parse(raw_url)
 
     # 1. Lowercase scheme

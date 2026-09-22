@@ -1,46 +1,84 @@
-# Percent encoding and decoding (RFC 3986 / WHATWG URL)
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/percent
+##
+## Percent encoding and decoding (RFC 3986 / WHATWG URL).
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
-pub function _url_is_unreserved(code)
-    if code >= 48 and code <= 57
-        return 1
-    elif code >= 65 and code <= 90
-        return 1
-    elif code >= 97 and code <= 122
-        return 1
-    elif code == 45 or code == 46 or code == 95 or code == 126
-        return 1
+## Checks whether a byte code is an unreserved character.
+##
+## ### Parameters
+## - `code`: Byte code integer.
+##
+## ### Returns
+## `1` for unreserved characters, `0` otherwise.
+pub function _url_is_unreserved(code: int) -> int
+    return when
+        code >= 48 and code <= 57  => 1
+        code >= 65 and code <= 90  => 1
+        code >= 97 and code <= 122 => 1
+        code == 45 or code == 46 or code == 95 or code == 126 => 1
+        else => 0
     end
-    return 0
 end
 
-pub function _url_hex_char(nibble)
+## Converts a 4-bit nibble to its uppercase hex character.
+##
+## ### Parameters
+## - `nibble`: Integer in the range `0..15`.
+##
+## ### Returns
+## The hex character string.
+pub function _url_hex_char(nibble: int) -> string
     if nibble < 10
         return chr(48 + nibble)
     end
     return chr(55 + nibble)
 end
 
-pub function _url_to_hex(code)
+## Converts a byte code to its two-character uppercase hex form.
+##
+## ### Parameters
+## - `code`: Byte code integer.
+##
+## ### Returns
+## The two-character hex string.
+pub function _url_to_hex(code: int) -> string
     let hi = (code / 16) % 16
     let lo = code % 16
-    return _url_hex_char(hi) + _url_hex_char(lo)
+    let hi_ch = _url_hex_char(hi)
+    let lo_ch = _url_hex_char(lo)
+    return "{hi_ch}{lo_ch}"
 end
 
-pub function _url_from_hex(ch)
+## Converts a hex character to its numeric value.
+##
+## ### Parameters
+## - `ch`: Hex character string.
+##
+## ### Returns
+## The nibble value, or `-1` for non-hex input.
+pub function _url_from_hex(ch: string) -> int
     let c = ord(ch)
-    if c >= 48 and c <= 57
-        return c - 48
-    elif c >= 65 and c <= 70
-        return c - 55
-    elif c >= 97 and c <= 102
-        return c - 87
+    return when c
+        is 48..57  => c - 48
+        is 65..70  => c - 55
+        is 97..102 => c - 87
+        else       => -1
     end
-    return -1
 end
 
-# Standard RFC 3986 percent encoding for arbitrary text
-pub function url_encode(text)
+## Standard RFC 3986 percent encoding for arbitrary text.
+##
+## ### Parameters
+## - `text`: Input text value.
+##
+## ### Returns
+## The percent-encoded string.
+##
+## ### Examples
+## ```alya
+## say url_encode("a b") # "a%20b"
+## ```
+pub function url_encode(text) -> string
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -50,15 +88,22 @@ pub function url_encode(text)
         if _url_is_unreserved(code) == 1
             res += chr(code)
         else
-            res += "%" + _url_to_hex(code)
+            let hex = _url_to_hex(code)
+            res += "%{hex}"
         end
         i += 1
     end
     return res
 end
 
-# Standard RFC 3986 percent decoding (supports '+' as space)
-pub function url_decode(text)
+## Standard RFC 3986 percent decoding (supports `+` as space).
+##
+## ### Parameters
+## - `text`: Encoded input text value.
+##
+## ### Returns
+## The decoded string.
+pub function url_decode(text) -> string
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -85,13 +130,25 @@ pub function url_decode(text)
     return res
 end
 
-# Component encoding (identical to url_encode for unreserved characters)
-pub function url_encode_component(text)
+## Component encoding (identical to `url_encode` for unreserved characters).
+##
+## ### Parameters
+## - `text`: Input text value.
+##
+## ### Returns
+## The percent-encoded string.
+pub function url_encode_component(text) -> string
     return url_encode(text)
 end
 
-# Component decoding without transforming '+' to space
-pub function url_decode_component(text)
+## Component decoding without transforming `+` to space.
+##
+## ### Parameters
+## - `text`: Encoded input text value.
+##
+## ### Returns
+## The decoded string.
+pub function url_decode_component(text) -> string
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -116,8 +173,14 @@ pub function url_decode_component(text)
     return res
 end
 
-# Percent-encodes path while preserving slash ('/')
-pub function url_encode_path(text)
+## Percent-encodes a path while preserving slashes (`/`).
+##
+## ### Parameters
+## - `text`: Input path value.
+##
+## ### Returns
+## The encoded path string.
+pub function url_encode_path(text) -> string
     let s = str_from_ptr(text)
     let slen = len(s)
     let res = ""
@@ -128,7 +191,8 @@ pub function url_encode_path(text)
         if ch == "/" or _url_is_unreserved(code) == 1
             res += ch
         else
-            res += "%" + _url_to_hex(code)
+            let hex = _url_to_hex(code)
+            res += "%{hex}"
         end
         i += 1
     end

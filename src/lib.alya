@@ -1,5 +1,7 @@
-# url - WHATWG and RFC 3986 Compliant URL Library for Alya
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url
+##
+## WHATWG and RFC 3986 compliant URL library for Alya.
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
 import "./types.alya"
 import "./core/percent.alya"
@@ -13,42 +15,90 @@ import "./core/normalize.alya"
 # High-Level Idiomatic Public API
 # ═══════════════════════════════════════════════════════════════
 
-# Parse a URL string into a Url struct
-pub function parse(raw_url)
+## Parses a URL string into a `Url` struct.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+##
+## ### Returns
+## The parsed `Url` instance.
+##
+## ### Examples
+## ```alya
+## let u = parse("https://example.com:8080/p?q=1#frag")
+## ```
+pub function parse(raw_url) -> Url
     return url_parse(raw_url)
 end
 
-# Format a Url struct into a URL string
-pub function format(u)
+## Formats a `Url` struct into a URL string.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The formatted URL string.
+pub function format(u: Url) -> string
     return url_format(u)
 end
 
-# Convert a Url struct to string
-pub function to_string(u)
+## Converts a `Url` struct into a URL string.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## The formatted URL string.
+pub function to_string(u: Url) -> string
     return url_format(u)
 end
 
-# Create a new fluent URL builder
-pub function builder()
+## Creates a new fluent URL builder.
+##
+## ### Returns
+## The new `UrlBuilder` instance.
+pub function builder() -> UrlBuilder
     return url_builder()
 end
 
-# Create a new empty UrlSearchParams container
-pub function search_params()
+## Creates a new empty `UrlSearchParams` container.
+##
+## ### Returns
+## The new container instance.
+pub function search_params() -> UrlSearchParams
     return search_params_new()
 end
 
-# Create UrlSearchParams from a query string
-pub function search_params_from(query_str)
+## Creates `UrlSearchParams` from a query string.
+##
+## ### Parameters
+## - `query_str`: Raw query value.
+##
+## ### Returns
+## The populated container instance.
+pub function search_params_from(query_str) -> UrlSearchParams
     return search_params_from_string(query_str)
 end
 
-# Normalize a URL string
-pub function normalize(raw_url)
+## Normalizes a URL string per RFC 3986 Section 6.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+##
+## ### Returns
+## The normalized URL string.
+pub function normalize(raw_url) -> string
     return url_normalize(raw_url)
 end
 
-# Resolve a relative URL or path against a base URL
-pub function join(base, relative)
+## Resolves a relative URL or path against a base URL.
+##
+## ### Parameters
+## - `base`: Base URL value.
+## - `relative`: Relative reference value.
+##
+## ### Returns
+## The resolved absolute URL string.
+pub function join(base, relative) -> string
     return url_join(base, relative)
 end

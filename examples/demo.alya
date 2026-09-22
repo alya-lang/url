@@ -1,4 +1,6 @@
-# Example showcase for url package (WHATWG / RFC 3986)
+## Demo of the url package (WHATWG / RFC 3986)
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+
 import "../src/lib.alya" as url
 
 function main()
@@ -10,25 +12,30 @@ function main()
     say "\n[1] Parsing Complex URL:"
     let raw = "https://developer:token123@api.alya-lang.org:8443/v1/packages/search?q=crypto&page=1#results"
     let u = url::parse(raw)
-    say "  Scheme   : " + u.scheme
-    say "  User     : " + u.username
-    say "  Password : " + u.password
-    say "  Host     : " + u.host
-    say "  Port     : " + u.port
-    say "  Path     : " + u.path
-    say "  Query    : " + u.query
-    say "  Fragment : " + u.fragment
-    say "  Origin   : " + url::url_origin(u)
-    say "  Is HTTPS : " + url::url_is_https(u)
+    say "  Scheme   : {u.scheme}"
+    say "  User     : {u.username}"
+    say "  Password : {u.password}"
+    say "  Host     : {u.host}"
+    say "  Port     : {u.port}"
+    say "  Path     : {u.path}"
+    say "  Query    : {u.query}"
+    say "  Fragment : {u.fragment}"
+    let origin = url::url_origin(u)
+    let is_https = url::url_is_https(u)
+    say "  Origin   : {origin}"
+    say "  Is HTTPS : {is_https}"
 
     # 2. Working with UrlSearchParams
     say "\n[2] UrlSearchParams Manipulation:"
     let sp = url::search_params_from(u.query)
-    say "  Param 'q'    : " + url::search_params_get(sp, "q")
-    say "  Param 'page' : " + url::search_params_get(sp, "page")
+    let q_val = url::search_params_get(sp, "q")
+    let page_val = url::search_params_get(sp, "page")
+    say "  Param 'q'    : {q_val}"
+    say "  Param 'page' : {page_val}"
     url::search_params_append(sp, "sort", "stars")
     url::search_params_set(sp, "page", "2")
-    say "  New Query    : " + url::search_params_to_string(sp)
+    let new_q = url::search_params_to_string(sp)
+    say "  New Query    : {new_q}"
 
     # 3. Fluent URL Builder
     say "\n[3] Constructing URL with Fluent Builder:"
@@ -40,21 +47,25 @@ function main()
     url::builder_param(b, "tab", "readme-ov-file")
     url::builder_fragment(b, "contributing")
     let built_url = url::builder_to_string(b)
-    say "  Built URL    : " + built_url
+    say "  Built URL    : {built_url}"
 
     # 4. Relative URL Reference Resolution (RFC 3986)
     say "\n[4] Resolving Relative References:"
     let base = "https://example.com/docs/api/v1/overview"
-    say "  Base         : " + base
-    say "  Join 'auth'  : " + url::join(base, "auth")
-    say "  Join '../v2' : " + url::join(base, "../v2/overview")
-    say "  Join '/root' : " + url::join(base, "/root")
+    let join_auth = url::join(base, "auth")
+    let join_v2 = url::join(base, "../v2/overview")
+    let join_root = url::join(base, "/root")
+    say "  Base         : {base}"
+    say "  Join 'auth'  : {join_auth}"
+    say "  Join '../v2' : {join_v2}"
+    say "  Join '/root' : {join_root}"
 
     # 5. URL Normalization
     say "\n[5] URL Normalization:"
     let messy = "HTTP://EXAMPLE.COM:80/a/b/../c/./d?z=2&a=1"
-    say "  Messy        : " + messy
-    say "  Normalized   : " + url::normalize(messy)
+    let normalized = url::normalize(messy)
+    say "  Messy        : {messy}"
+    say "  Normalized   : {normalized}"
 
     say "\n✓ Showcase completed successfully!"
 end

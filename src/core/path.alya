@@ -1,10 +1,24 @@
-# URL Path manipulation, dot-segment normalization, and reference resolution (RFC 3986)
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/path
+##
+## URL path manipulation, dot-segment normalization, and reference resolution.
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
+##
+## Implements RFC 3986 Section 5.2.4 dot-segment removal and Section 5
+## reference resolution shared by the parser and builder.
 
 import "../types.alya"
 import "./percent.alya"
 
-pub function _url_find(s, target, start_idx)
+## Finds the first index of a target substring at or after a start index.
+##
+## ### Parameters
+## - `s`: Haystack string.
+## - `target`: Needle string.
+## - `start_idx`: Starting index integer.
+##
+## ### Returns
+## The match index, or `-1` when absent (`start_idx` for empty targets).
+pub function _url_find(s: string, target: string, start_idx: int) -> int
     let slen = len(s)
     let tlen = len(target)
     if tlen == 0
@@ -20,8 +34,14 @@ pub function _url_find(s, target, start_idx)
     return -1
 end
 
-# Splits a URL struct into non-empty path segments
-pub function url_path_segments(u)
+## Splits a `Url` struct into non-empty path segments.
+##
+## ### Parameters
+## - `u`: Target `Url` instance.
+##
+## ### Returns
+## Array of non-empty segment strings.
+pub function url_path_segments(u: Url) -> array
     let p = str_from_ptr(u.path)
     let plen = len(p)
     if plen == 0
@@ -38,8 +58,19 @@ pub function url_path_segments(u)
     return res
 end
 
-# RFC 3986 Section 5.2.4: Remove Dot Segments algorithm
-pub function url_remove_dot_segments(path)
+## Removes dot segments per RFC 3986 Section 5.2.4.
+##
+## ### Parameters
+## - `path`: Raw path value.
+##
+## ### Returns
+## The normalized path string.
+##
+## ### Examples
+## ```alya
+## say url_remove_dot_segments("/a/b/../c") # "/a/c"
+## ```
+pub function url_remove_dot_segments(path) -> string
     let p = str_from_ptr(path)
     let plen = len(p)
     if plen == 0
@@ -74,7 +105,8 @@ pub function url_remove_dot_segments(path)
 
     let out = ""
     for item in stack
-        out += "/" + str_from_ptr(item)
+        let seg_str = str_from_ptr(item)
+        out += "/{seg_str}"
     end
 
     if len(out) == 0
@@ -95,8 +127,15 @@ pub function url_remove_dot_segments(path)
     return out
 end
 
-# Joins two path strings without duplicate slashes
-pub function url_join_path(base_path, rel_path)
+## Joins two path strings without duplicate slashes.
+##
+## ### Parameters
+## - `base_path`: Base path value.
+## - `rel_path`: Relative path value.
+##
+## ### Returns
+## The joined path string.
+pub function url_join_path(base_path, rel_path) -> string
     let b = str_from_ptr(base_path)
     let r = str_from_ptr(rel_path)
     let blen = len(b)
@@ -115,14 +154,26 @@ pub function url_join_path(base_path, rel_path)
     if b_ends_slash == 1 and r_starts_slash == 1
         return substring(b, 0, blen - 1) + r
     elif b_ends_slash == 0 and r_starts_slash == 0
-        return b + "/" + r
+        return "{b}/{r}"
     else
         return b + r
     end
 end
 
-# Resolves a relative URL against a base URL (RFC 3986 Section 5)
-pub function url_join(base, relative)
+## Resolves a relative URL against a base URL (RFC 3986 Section 5).
+##
+## ### Parameters
+## - `base`: Base URL value.
+## - `relative`: Relative reference value.
+##
+## ### Returns
+## The resolved absolute URL string.
+##
+## ### Examples
+## ```alya
+## say url_join("https://a/b/c", "../d") # "https://a/d"
+## ```
+pub function url_join(base, relative) -> string
     let b = str_from_ptr(base)
     let r = str_from_ptr(relative)
     let blen = len(b)
@@ -153,7 +204,7 @@ pub function url_join(base, relative)
 
     # Protocol-relative URL: //example.com/foo
     if len(r) >= 2 and substring(r, 0, 2) == "//"
-        return scheme + ":" + r
+        return "{scheme}:{r}"
     end
 
     # Find authority and path in base
@@ -180,7 +231,7 @@ pub function url_join(base, relative)
 
     # 1. Query-only relative: ?q=1
     if char_at(r, 0) == "?"
-        return scheme + "://" + authority + b_path + r
+        return "{scheme}://{authority}{b_path}{r}"
     end
 
     # 2. Fragment-only relative: #section
@@ -191,7 +242,7 @@ pub function url_join(base, relative)
     # 3. Absolute path relative: /new/path
     if char_at(r, 0) == "/"
         let norm_path = url_remove_dot_segments(r)
-        return scheme + "://" + authority + norm_path
+        return "{scheme}://{authority}{norm_path}"
     end
 
     # 4. Relative path: dir/file or ../file
@@ -213,5 +264,5 @@ pub function url_join(base, relative)
 
     let merged = base_dir + r
     let clean_path = url_remove_dot_segments(merged)
-    return scheme + "://" + authority + clean_path
+    return "{scheme}://{authority}{clean_path}"
 end

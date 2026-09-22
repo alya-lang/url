@@ -1,21 +1,29 @@
-# Query string parsing, formatting, and WHATWG UrlSearchParams
-# Part of the Alya Language package ecosystem (https://github.com/alya-lang)
+## # url/core/query
+##
+## Query string parsing, formatting, and WHATWG UrlSearchParams.
+## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
 import "../types.alya"
 import "./percent.alya"
 import "./path.alya"
 import "./parser.alya"
 
-# Formats a Map into a percent-encoded query string
-pub function url_format_query(m)
+## Formats a map into a percent-encoded query string.
+##
+## ### Parameters
+## - `m`: Query entry map.
+##
+## ### Returns
+## The encoded query string (without `?`).
+pub function url_format_query(m) -> string
     let out = ""
     let first = true
     for k, v in m
         let enc_k = url_encode(str_from_ptr(k))
         let enc_v = url_encode(str_from_ptr(v))
-        let pair = enc_k + "=" + enc_v
+        let pair = "{enc_k}={enc_v}"
         if not first
-            out += "&" + pair
+            out += "&{pair}"
         else
             out = pair
             first = false
@@ -24,7 +32,13 @@ pub function url_format_query(m)
     return out
 end
 
-# Parses a query string into a Map
+## Parses a query string into a map.
+##
+## ### Parameters
+## - `query_str`: Raw query value (leading `?` tolerated).
+##
+## ### Returns
+## The decoded entry map.
 pub function url_parse_query(query_str)
     let q = str_from_ptr(query_str)
     let qlen = len(q)
@@ -72,7 +86,15 @@ pub function url_parse_query(query_str)
     return res
 end
 
-pub function url_get_query_param(raw_url, key)
+## Returns a decoded query parameter value from a raw URL.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+## - `key`: Parameter key value.
+##
+## ### Returns
+## The decoded value string (empty when absent).
+pub function url_get_query_param(raw_url, key) -> string
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
@@ -82,14 +104,31 @@ pub function url_get_query_param(raw_url, key)
     return ""
 end
 
-pub function url_has_query_param(raw_url, key)
+## Checks whether a raw URL carries a query parameter.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+## - `key`: Parameter key value.
+##
+## ### Returns
+## `1` when present, `0` otherwise.
+pub function url_has_query_param(raw_url, key) -> int
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
     return if k in q_map then 1 else 0
 end
 
-pub function url_set_query_param(raw_url, key, value)
+## Sets (or replaces) a query parameter, returning the rebuilt URL.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+## - `key`: Parameter key value.
+## - `value`: Parameter value.
+##
+## ### Returns
+## The rebuilt URL string.
+pub function url_set_query_param(raw_url, key, value) -> string
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
@@ -100,7 +139,15 @@ pub function url_set_query_param(raw_url, key, value)
     return url_format(u)
 end
 
-pub function url_remove_query_param(raw_url, key)
+## Removes a query parameter, returning the rebuilt URL.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+## - `key`: Parameter key value.
+##
+## ### Returns
+## The rebuilt URL string.
+pub function url_remove_query_param(raw_url, key) -> string
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k_target = str_from_ptr(key)
@@ -115,15 +162,24 @@ pub function url_remove_query_param(raw_url, key)
     return url_format(u)
 end
 
-pub function url_append_query_param(raw_url, key, value)
+## Appends a query parameter, returning the rebuilt URL.
+##
+## ### Parameters
+## - `raw_url`: Raw URL value.
+## - `key`: Parameter key value.
+## - `value`: Parameter value.
+##
+## ### Returns
+## The rebuilt URL string.
+pub function url_append_query_param(raw_url, key, value) -> string
     let u = url_parse(raw_url)
     let enc_k = url_encode(str_from_ptr(key))
     let enc_v = url_encode(str_from_ptr(value))
-    let pair = enc_k + "=" + enc_v
+    let pair = "{enc_k}={enc_v}"
 
     let current_q = str_from_ptr(u.query)
     if len(current_q) > 0
-        u.query = current_q + "&" + pair
+        u.query = "{current_q}&{pair}"
     else
         u.query = pair
     end
@@ -134,11 +190,22 @@ end
 # WHATWG-style UrlSearchParams API
 # ═══════════════════════════════════════════════════════════════
 
-pub function search_params_new()
+## Creates an empty `UrlSearchParams` container.
+##
+## ### Returns
+## The new container instance.
+pub function search_params_new() -> UrlSearchParams
     return search_params_create([])
 end
 
-pub function search_params_from_string(query_str)
+## Parses a query string into a `UrlSearchParams` container.
+##
+## ### Parameters
+## - `query_str`: Raw query value (leading `?` tolerated).
+##
+## ### Returns
+## The populated container instance.
+pub function search_params_from_string(query_str) -> UrlSearchParams
     let q = str_from_ptr(query_str)
     let qlen = len(q)
     let entries = []
@@ -182,7 +249,14 @@ pub function search_params_from_string(query_str)
     return search_params_create(entries)
 end
 
-pub function search_params_from_map(m)
+## Builds a `UrlSearchParams` container from a map.
+##
+## ### Parameters
+## - `m`: Entry map.
+##
+## ### Returns
+## The populated container instance.
+pub function search_params_from_map(m) -> UrlSearchParams
     let entries = []
     for k, v in m
         entries.push([str_from_ptr(k), str_from_ptr(v)])
@@ -190,7 +264,15 @@ pub function search_params_from_map(m)
     return search_params_create(entries)
 end
 
-pub function search_params_get(sp, key)
+## Returns the first value for a key, or `""` when absent.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## The first value string.
+pub function search_params_get(sp: UrlSearchParams, key) -> string
     let k_target = str_from_ptr(key)
     for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
@@ -200,7 +282,15 @@ pub function search_params_get(sp, key)
     return ""
 end
 
-pub function search_params_get_all(sp, key)
+## Returns every value for a key in insertion order.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## Array of value strings.
+pub function search_params_get_all(sp: UrlSearchParams, key) -> array
     let k_target = str_from_ptr(key)
     let res = []
     for pair in sp.entries
@@ -211,7 +301,15 @@ pub function search_params_get_all(sp, key)
     return res
 end
 
-pub function search_params_has(sp, key)
+## Checks whether a key exists in the container.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## `1` when present, `0` otherwise.
+pub function search_params_has(sp: UrlSearchParams, key) -> int
     let k_target = str_from_ptr(key)
     for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
@@ -221,7 +319,13 @@ pub function search_params_has(sp, key)
     return 0
 end
 
-pub function search_params_set(sp, key, value)
+## Sets a key, replacing existing entries and appending when absent.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+## - `value`: Value to store.
+pub function search_params_set(sp: UrlSearchParams, key, value)
     let k_target = str_from_ptr(key)
     let v_val = str_from_ptr(value)
     let new_entries = []
@@ -245,11 +349,22 @@ pub function search_params_set(sp, key, value)
     sp.entries = new_entries
 end
 
-pub function search_params_append(sp, key, value)
+## Appends a key-value pair without replacing existing entries.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+## - `value`: Value to store.
+pub function search_params_append(sp: UrlSearchParams, key, value)
     sp.entries.push([str_from_ptr(key), str_from_ptr(value)])
 end
 
-pub function search_params_delete(sp, key)
+## Deletes every entry for a key.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+## - `key`: Key value.
+pub function search_params_delete(sp: UrlSearchParams, key)
     let k_target = str_from_ptr(key)
     let new_entries = []
     for pair in sp.entries
@@ -260,7 +375,8 @@ pub function search_params_delete(sp, key)
     sp.entries = new_entries
 end
 
-function _str_cmp(s1, s2)
+# Lexicographic string comparator for parameter sorting.
+function _str_cmp(s1: string, s2: string) -> int
     let len1 = len(s1)
     let len2 = len(s2)
     let min_len = if len1 < len2 then len1 else len2
@@ -283,7 +399,11 @@ function _str_cmp(s1, s2)
     return 0
 end
 
-pub function search_params_sort(sp)
+## Sorts container entries by key (stable bubble sort).
+##
+## ### Parameters
+## - `sp`: Target container instance.
+pub function search_params_sort(sp: UrlSearchParams)
     let n = len(sp.entries)
     let i = 0
     while i < n
@@ -302,15 +422,22 @@ pub function search_params_sort(sp)
     end
 end
 
-pub function search_params_to_string(sp)
+## Serializes the container into an encoded query string.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+##
+## ### Returns
+## The encoded query string (without `?`).
+pub function search_params_to_string(sp: UrlSearchParams) -> string
     let out = ""
     let first = true
     for pair in sp.entries
         let k = url_encode(str_from_ptr(pair[0]))
         let v = url_encode(str_from_ptr(pair[1]))
-        let item = k + "=" + v
+        let item = "{k}={v}"
         if not first
-            out += "&" + item
+            out += "&{item}"
         else
             out = item
             first = false
@@ -319,7 +446,14 @@ pub function search_params_to_string(sp)
     return out
 end
 
-pub function search_params_to_map(sp)
+## Converts the container into a first-wins entry map.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+##
+## ### Returns
+## The entry map.
+pub function search_params_to_map(sp: UrlSearchParams)
     let m = {}
     for pair in sp.entries
         let k = str_from_ptr(pair[0])
@@ -331,7 +465,14 @@ pub function search_params_to_map(sp)
     return m
 end
 
-pub function search_params_keys(sp)
+## Returns deduplicated keys in insertion order.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+##
+## ### Returns
+## Array of key strings.
+pub function search_params_keys(sp: UrlSearchParams) -> array
     let res = []
     let seen = {}
     for pair in sp.entries
@@ -344,11 +485,22 @@ pub function search_params_keys(sp)
     return res
 end
 
-pub function search_params_len(sp)
+## Returns the entry count of the container.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+##
+## ### Returns
+## The entry count integer.
+pub function search_params_len(sp: UrlSearchParams) -> int
     return len(sp.entries)
 end
 
-pub function search_params_clear(sp)
+## Removes every entry from the container.
+##
+## ### Parameters
+## - `sp`: Target container instance.
+pub function search_params_clear(sp: UrlSearchParams)
     sp.entries = []
 end
 
@@ -356,55 +508,147 @@ end
 # Struct Methods on UrlSearchParams
 # ═══════════════════════════════════════════════════════════════
 
-pub function UrlSearchParams.get(self, key)
+## Returns the first value for a key, or `""` when absent.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## The first value string.
+pub function UrlSearchParams.get(self: UrlSearchParams, key) -> string
     return search_params_get(self, key)
 end
 
-pub function UrlSearchParams.get_all(self, key)
+## Returns every value for a key in insertion order.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## Array of value strings.
+pub function UrlSearchParams.get_all(self: UrlSearchParams, key) -> array
     return search_params_get_all(self, key)
 end
 
-pub function UrlSearchParams.has(self, key)
+## Checks whether a key exists in this container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## `1` when present, `0` otherwise.
+pub function UrlSearchParams.has(self: UrlSearchParams, key) -> int
     return search_params_has(self, key)
 end
 
-pub function UrlSearchParams.set(self, key, value)
+## Sets a key, returning the updated container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+## - `value`: Value to store.
+##
+## ### Returns
+## The updated container instance.
+pub function UrlSearchParams.set(self: UrlSearchParams, key, value) -> UrlSearchParams
     search_params_set(self, key, value)
     return self
 end
 
-pub function UrlSearchParams.append(self, key, value)
+## Appends a pair, returning the updated container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+## - `value`: Value to store.
+##
+## ### Returns
+## The updated container instance.
+pub function UrlSearchParams.append(self: UrlSearchParams, key, value) -> UrlSearchParams
     search_params_append(self, key, value)
     return self
 end
 
-pub function UrlSearchParams.delete(self, key)
+## Deletes a key, returning the updated container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+## - `key`: Key value.
+##
+## ### Returns
+## The updated container instance.
+pub function UrlSearchParams.delete(self: UrlSearchParams, key) -> UrlSearchParams
     search_params_delete(self, key)
     return self
 end
 
-pub function UrlSearchParams.sort(self)
+## Sorts entries by key, returning the updated container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## The updated container instance.
+pub function UrlSearchParams.sort(self: UrlSearchParams) -> UrlSearchParams
     search_params_sort(self)
     return self
 end
 
-pub function UrlSearchParams.to_string(self)
+## Serializes this container into an encoded query string.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## The encoded query string (without `?`).
+pub function UrlSearchParams.to_string(self: UrlSearchParams) -> string
     return search_params_to_string(self)
 end
 
-pub function UrlSearchParams.to_map(self)
+## Converts this container into a first-wins entry map.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## The entry map.
+pub function UrlSearchParams.to_map(self: UrlSearchParams)
     return search_params_to_map(self)
 end
 
-pub function UrlSearchParams.keys(self)
+## Returns deduplicated keys in insertion order.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## Array of key strings.
+pub function UrlSearchParams.keys(self: UrlSearchParams) -> array
     return search_params_keys(self)
 end
 
-pub function UrlSearchParams.len(self)
+## Returns the entry count of this container.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## The entry count integer.
+pub function UrlSearchParams.len(self: UrlSearchParams) -> int
     return search_params_len(self)
 end
 
-pub function UrlSearchParams.clear(self)
+## Clears this container, returning the updated instance.
+##
+## ### Parameters
+## - `self`: The target container instance.
+##
+## ### Returns
+## The updated container instance.
+pub function UrlSearchParams.clear(self: UrlSearchParams) -> UrlSearchParams
     search_params_clear(self)
     return self
 end
