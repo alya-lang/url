@@ -7,7 +7,6 @@
 ## fragment components, and formats structs back into URL strings.
 
 import "../types.alya"
-import "./percent.alya"
 import "./path.alya"
 
 ## Coerces a possibly foreign string field into a native string.

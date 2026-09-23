@@ -4,7 +4,6 @@
 ## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
 import "./types.alya"
-import "./core/percent.alya"
 import "./core/path.alya"
 import "./core/parser.alya"
 import "./core/query.alya"

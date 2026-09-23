@@ -3,7 +3,6 @@
 ## URL normalization (RFC 3986 Section 6).
 ## Part of the Alya Language package ecosystem (https://github.com/alya-lang).
 
-import "../types.alya"
 import "./percent.alya"
 import "./path.alya"
 import "./parser.alya"

@@ -7,7 +7,6 @@
 ## reference resolution shared by the parser and builder.
 
 import "../types.alya"
-import "./percent.alya"
 
 ## Finds the first index of a target substring at or after a start index.
 ##
