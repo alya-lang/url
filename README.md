@@ -67,6 +67,26 @@ alya add url --git https://github.com/alya-lang/url --branch main
 alya install
 ```
 
+### Package Features
+
+| Feature | Default | Description |
+|:---|:---:|:---|
+| `query` | ✅ | Query strings and `UrlSearchParams`. |
+| `builder` | ✅ | Fluent `UrlBuilder` API. |
+| `normalize` | ✅ | URL normalization (`normalize`). |
+
+Parsing/formatting/joining (`parse`, `format`, `join`, percent coding) always work.
+
+```bash
+# Full build (default)
+alya install
+alya test
+
+# Slim build (parse only)
+alya install --no-default-features
+alya test --no-default-features
+```
+
 ---
 
 ## 🚀 Quick Start

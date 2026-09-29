@@ -3,6 +3,7 @@
 import "std/test"
 import "../src/lib.alya" as url
 
+@cfg(feature = "normalize")
 function main()
     test_suite("URL Normalization Test Suite")
     let r = runner_new()
@@ -31,6 +32,18 @@ function main()
     # 6. Query string parameter sorting
     runner_assert_str_eq(r, url::normalize("http://example.com/?z=last&a=first&m=middle"), "http://example.com/?a=first&m=middle&z=last", "query parameters sorted in canonical order")
 
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+# Needs the feature: register an empty suite so the file still
+# compiles and passes in slim views.
+@cfg(not(feature = "normalize"))
+function main()
+    test_suite("URL Normalization Test Suite (skipped without normalize feature)")
+    let r = runner_new()
     let failed = runner_summary(r)
     if failed > 0
         exit(1)

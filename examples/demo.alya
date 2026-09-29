@@ -25,29 +25,11 @@ function main()
     say "  Origin   : {origin}"
     say "  Is HTTPS : {is_https}"
 
-    # 2. Working with UrlSearchParams
-    say "\n[2] UrlSearchParams Manipulation:"
-    let sp = url::search_params_from(u.query)
-    let q_val = url::search_params_get(sp, "q")
-    let page_val = url::search_params_get(sp, "page")
-    say "  Param 'q'    : {q_val}"
-    say "  Param 'page' : {page_val}"
-    url::search_params_append(sp, "sort", "stars")
-    url::search_params_set(sp, "page", "2")
-    let new_q = url::search_params_to_string(sp)
-    say "  New Query    : {new_q}"
+    @cfg(feature = "query")
+    demo_query()
 
-    # 3. Fluent URL Builder
-    say "\n[3] Constructing URL with Fluent Builder:"
-    let b = url::builder()
-    url::builder_scheme(b, "https")
-    url::builder_host(b, "github.com")
-    url::builder_path(b, "/alya-lang")
-    url::builder_append_path(b, "url")
-    url::builder_param(b, "tab", "readme-ov-file")
-    url::builder_fragment(b, "contributing")
-    let built_url = url::builder_to_string(b)
-    say "  Built URL    : {built_url}"
+    @cfg(feature = "builder")
+    demo_builder()
 
     # 4. Relative URL Reference Resolution (RFC 3986)
     say "\n[4] Resolving Relative References:"
@@ -60,14 +42,49 @@ function main()
     say "  Join '../v2' : {join_v2}"
     say "  Join '/root' : {join_root}"
 
+    @cfg(feature = "normalize")
+    demo_normalize()
+
+    say "\n✓ Showcase completed successfully!"
+end
+
+@cfg(feature = "query")
+function demo_query()
+    # 2. Working with UrlSearchParams
+    say "\n[2] UrlSearchParams Manipulation:"
+    let sp = url::search_params_from(u.query)
+    let q_val = url::search_params_get(sp, "q")
+    let page_val = url::search_params_get(sp, "page")
+    say "  Param 'q'    : {q_val}"
+    say "  Param 'page' : {page_val}"
+    url::search_params_append(sp, "sort", "stars")
+    url::search_params_set(sp, "page", "2")
+    let new_q = url::search_params_to_string(sp)
+    say "  New Query    : {new_q}"
+end
+
+@cfg(feature = "builder")
+function demo_builder()
+    # 3. Fluent URL Builder
+    say "\n[3] Constructing URL with Fluent Builder:"
+    let b = url::builder()
+    url::builder_scheme(b, "https")
+    url::builder_host(b, "github.com")
+    url::builder_path(b, "/alya-lang")
+    url::builder_append_path(b, "url")
+    url::builder_param(b, "tab", "readme-ov-file")
+    url::builder_fragment(b, "contributing")
+    let built_url = url::builder_to_string(b)
+    say "  Built URL    : {built_url}"
+end
+
+@cfg(feature = "normalize")
+function demo_normalize()
     # 5. URL Normalization
     say "\n[5] URL Normalization:"
     let messy = "HTTP://EXAMPLE.COM:80/a/b/../c/./d?z=2&a=1"
     let normalized = url::normalize(messy)
     say "  Messy        : {messy}"
     say "  Normalized   : {normalized}"
-
-    say "\n✓ Showcase completed successfully!"
 end
-
 main()

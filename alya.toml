@@ -12,6 +12,12 @@ keywords = ["alya", "alya-lang", "package", "url", "uri", "parser", "whatwg", "q
 
 [dependencies]
 
+[features]
+default = ["query", "builder", "normalize"]
+query = []
+builder = []
+normalize = []
+
 # [lint]
 # disabled_rules = []
 # exclude = []

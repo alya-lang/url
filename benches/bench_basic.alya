@@ -25,6 +25,17 @@ function main()
     end
     bench_stop(runner, "url::format() 2k calls")
 
+    @cfg(feature = "query")
+    bench_query(runner)
+
+    @cfg(feature = "normalize")
+    bench_normalize(runner)
+
+    bench_summary(runner)
+end
+
+@cfg(feature = "query")
+function bench_query(runner)
     # 3. Query string parsing & serialization benchmark
     bench_start(runner, 2000)
     let k = 0
@@ -34,7 +45,10 @@ function main()
         k += 1
     end
     bench_stop(runner, "search_params_from() + to_string() 2k calls")
+end
 
+@cfg(feature = "normalize")
+function bench_normalize(runner)
     # 4. URL normalization benchmark
     bench_start(runner, 2000)
     let m = 0
@@ -43,8 +57,5 @@ function main()
         m += 1
     end
     bench_stop(runner, "url::normalize() 2k calls")
-
-    bench_summary(runner)
 end
-
 main()

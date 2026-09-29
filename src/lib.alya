@@ -6,8 +6,12 @@
 import "./types.alya"
 import "./core/path.alya"
 import "./core/parser.alya"
+import "./core/percent.alya"
+@cfg(feature = "query")
 import "./core/query.alya"
+@cfg(feature = "builder")
 import "./core/builder.alya"
+@cfg(feature = "normalize")
 import "./core/normalize.alya"
 
 # ═══════════════════════════════════════════════════════════════
@@ -54,38 +58,50 @@ end
 
 ## Creates a new fluent URL builder.
 ##
+## Requires the `builder` feature (default-on).
+##
 ## ### Returns
 ## The new `UrlBuilder` instance.
+@cfg(feature = "builder")
 pub function builder() -> UrlBuilder
     return url_builder()
 end
 
 ## Creates a new empty `UrlSearchParams` container.
 ##
+## Requires the `query` feature (default-on).
+##
 ## ### Returns
 ## The new container instance.
+@cfg(feature = "query")
 pub function search_params() -> UrlSearchParams
     return search_params_new()
 end
 
 ## Creates `UrlSearchParams` from a query string.
 ##
+## Requires the `query` feature (default-on).
+##
 ## ### Parameters
 ## - `query_str`: Raw query value.
 ##
 ## ### Returns
 ## The populated container instance.
+@cfg(feature = "query")
 pub function search_params_from(query_str) -> UrlSearchParams
     return search_params_from_string(query_str)
 end
 
 ## Normalizes a URL string per RFC 3986 Section 6.
 ##
+## Requires the `normalize` feature (default-on).
+##
 ## ### Parameters
 ## - `raw_url`: Raw URL value.
 ##
 ## ### Returns
 ## The normalized URL string.
+@cfg(feature = "normalize")
 pub function normalize(raw_url) -> string
     return url_normalize(raw_url)
 end

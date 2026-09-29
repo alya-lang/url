@@ -3,6 +3,7 @@
 import "std/test"
 import "../src/lib.alya" as url
 
+@cfg(feature = "query")
 function main()
     test_suite("Query String & UrlSearchParams Test Suite")
     let r = runner_new()
@@ -84,6 +85,18 @@ function main()
     url::search_params_clear(sp_map)
     runner_assert_eq(r, url::search_params_len(sp_map), 0, "search_params_clear empties container")
 
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+# Needs the feature: register an empty suite so the file still
+# compiles and passes in slim views.
+@cfg(not(feature = "query"))
+function main()
+    test_suite("Query String & UrlSearchParams Test Suite (skipped without query feature)")
+    let r = runner_new()
     let failed = runner_summary(r)
     if failed > 0
         exit(1)

@@ -3,6 +3,7 @@
 import "std/test"
 import "../src/lib.alya" as url
 
+@cfg(feature = "builder")
 function main()
     test_suite("Fluent URL Builder Test Suite")
     let r = runner_new()
@@ -66,6 +67,18 @@ function main()
     runner_assert_eq(r, u5.is_https(), true, "u5.is_https() method")
     runner_assert_eq(r, url::UrlScheme.HTTPS, 2, "UrlScheme.HTTPS enum")
 
+    let failed = runner_summary(r)
+    if failed > 0
+        exit(1)
+    end
+end
+
+# Needs the feature: register an empty suite so the file still
+# compiles and passes in slim views.
+@cfg(not(feature = "builder"))
+function main()
+    test_suite("Fluent URL Builder Test Suite (skipped without builder feature)")
+    let r = runner_new()
     let failed = runner_summary(r)
     if failed > 0
         exit(1)
