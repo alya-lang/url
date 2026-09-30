@@ -1,6 +1,6 @@
 [package]
 name = "url"
-version = "0.2.0"
+version = "0.1.0"
 alya-version = "0.0.19"
 entry = "src/lib.alya"
 description = "WHATWG and RFC 3986 compliant URL parser, serializer, and query string library for Alya"
@@ -11,12 +11,6 @@ repository = "https://github.com/alya-lang/url"
 keywords = ["alya", "alya-lang", "package", "url", "uri", "parser", "whatwg", "query-string", "networking"]
 
 [dependencies]
-
-[features]
-default = ["query", "builder", "normalize"]
-query = []
-builder = []
-normalize = []
 
 # [lint]
 # disabled_rules = []
@@ -30,3 +24,9 @@ normalize = []
 
 # [bench]
 # exclude = []
+
+[features]
+default = ["query", "builder", "normalize"]
+query = []
+builder = []
+normalize = []
