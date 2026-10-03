@@ -30,13 +30,13 @@ function main()
     runner_assert_str_eq(r, u2.path, "/", "u2.path is /")
     runner_assert_str_eq(r, url::url_origin(u2), "http://example.org", "url_origin without port")
     runner_assert_str_eq(r, url::url_effective_port(u2), "80", "effective port for http is 80")
-    runner_assert_eq(r, url::url_is_http(u2), 1, "u2 is http")
-    runner_assert_eq(r, url::url_is_https(u2), 0, "u2 is not https")
+    runner_assert_eq(r, url::url_is_http(u2), true, "u2 is http")
+    runner_assert_eq(r, url::url_is_https(u2), false, "u2 is not https")
 
     # 4. HTTPS effective port
     let u3 = url::parse("https://secure.com")
     runner_assert_str_eq(r, url::url_effective_port(u3), "443", "effective port for https is 443")
-    runner_assert_eq(r, url::url_is_https(u3), 1, "u3 is https")
+    runner_assert_eq(r, url::url_is_https(u3), true, "u3 is https")
 
     # 5. IPv4 Host
     let u4 = url::parse("http://127.0.0.1:3000/health")

@@ -78,13 +78,13 @@ pub function url_remove_dot_segments(path) -> string
 
     let starts_slash = char_at(p, 0) == "/"
     let ends_slash = char_at(p, plen - 1) == "/"
-    let ends_dot = 0
+    let ends_dot = false
     if plen >= 2 and substring(p, plen - 2, 2) == "/."
-        ends_dot = 1
+        ends_dot = true
     elif plen >= 3 and substring(p, plen - 3, 3) == "/.."
-        ends_dot = 1
+        ends_dot = true
     end
-    let should_end_slash = ends_slash == 1 or ends_dot == 1
+    let should_end_slash = ends_slash == true or ends_dot == true
 
     let raw_segs = split(p, "/")
     let stack = []
@@ -109,17 +109,17 @@ pub function url_remove_dot_segments(path) -> string
     end
 
     if len(out) == 0
-        if starts_slash == 1
+        if starts_slash == true
             return "/"
         end
         return ""
     end
 
-    if starts_slash == 0 and len(out) > 1
+    if starts_slash == false and len(out) > 1
         out = substring(out, 1, len(out) - 1)
     end
 
-    if should_end_slash == 1 and char_at(out, len(out) - 1) != "/"
+    if should_end_slash == true and char_at(out, len(out) - 1) != "/"
         out += "/"
     end
 
@@ -150,9 +150,9 @@ pub function url_join_path(base_path, rel_path) -> string
     let b_ends_slash = char_at(b, blen - 1) == "/"
     let r_starts_slash = char_at(r, 0) == "/"
 
-    if b_ends_slash == 1 and r_starts_slash == 1
+    if b_ends_slash == true and r_starts_slash == true
         return substring(b, 0, blen - 1) + r
-    elif b_ends_slash == 0 and r_starts_slash == 0
+    elif b_ends_slash == false and r_starts_slash == false
         return "{b}/{r}"
     else
         return b + r

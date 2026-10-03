@@ -63,8 +63,8 @@ end
 pub function url_is_special(scheme) -> int
     let s = str_from_ptr(scheme)
     when s
-        is "http", "https", "ws", "wss", "ftp", "file" then return 1
-        else return 0
+        is "http", "https", "ws", "wss", "ftp", "file" then return true
+        else return false
     end
 end
 
@@ -108,7 +108,7 @@ pub function url_parse(raw_url) -> Url
     # 3. Scheme
     let scheme = ""
     let scheme_idx = _url_find(s, "://", 0)
-    let is_hierarchical = 1
+    let is_hierarchical = true
     if scheme_idx >= 0
         scheme = substring(s, 0, scheme_idx)
         s = substring(s, scheme_idx + 3, slen - (scheme_idx + 3))
@@ -121,7 +121,7 @@ pub function url_parse(raw_url) -> Url
             scheme = substring(s, 0, colon_idx)
             s = substring(s, colon_idx + 1, slen - (colon_idx + 1))
             slen = len(s)
-            is_hierarchical = 0
+            is_hierarchical = false
         end
     end
 
@@ -132,7 +132,7 @@ pub function url_parse(raw_url) -> Url
     let password = ""
     let path = ""
 
-    if is_hierarchical == 0
+    if is_hierarchical == false
         # Non-hierarchical (e.g. mailto:test@example.com)
         path = s
         return url_create(scheme, username, password, host, port, path, query, fragment)

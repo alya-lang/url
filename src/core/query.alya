@@ -56,14 +56,14 @@ pub function url_parse_query(query_str)
     let i = 0
 
     while i <= qlen
-        let is_sep = 0
+        let is_sep = false
         if i == qlen
-            is_sep = 1
+            is_sep = true
         elif char_at(q, i) == "&"
-            is_sep = 1
+            is_sep = true
         end
 
-        if is_sep == 1
+        if is_sep == true
             if i > start
                 let pair = substring(q, start, i - start)
                 let eq_idx = _url_find(pair, "=", 0)
@@ -116,7 +116,7 @@ pub function url_has_query_param(raw_url, key) -> int
     let u = url_parse(raw_url)
     let q_map = url_parse_query(u.query)
     let k = str_from_ptr(key)
-    return if k in q_map then 1 else 0
+    return if k in q_map then true else false
 end
 
 ## Sets (or replaces) a query parameter, returning the rebuilt URL.
@@ -222,14 +222,14 @@ pub function search_params_from_string(query_str) -> UrlSearchParams
     let i = 0
 
     while i <= qlen
-        let is_sep = 0
+        let is_sep = false
         if i == qlen
-            is_sep = 1
+            is_sep = true
         elif char_at(q, i) == "&"
-            is_sep = 1
+            is_sep = true
         end
 
-        if is_sep == 1
+        if is_sep == true
             if i > start
                 let pair = substring(q, start, i - start)
                 let eq_idx = _url_find(pair, "=", 0)
@@ -313,10 +313,10 @@ pub function search_params_has(sp: UrlSearchParams, key) -> int
     let k_target = str_from_ptr(key)
     for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
-            return 1
+            return true
         end
     end
-    return 0
+    return false
 end
 
 ## Sets a key, replacing existing entries and appending when absent.
@@ -329,20 +329,20 @@ pub function search_params_set(sp: UrlSearchParams, key, value)
     let k_target = str_from_ptr(key)
     let v_val = str_from_ptr(value)
     let new_entries = []
-    let set_done = 0
+    let set_done = false
 
     for pair in sp.entries
         if str_from_ptr(pair[0]) == k_target
-            if set_done == 0
+            if set_done == false
                 new_entries.push([k_target, v_val])
-                set_done = 1
+                set_done = true
             end
         else
             new_entries.push(pair)
         end
     end
 
-    if set_done == 0
+    if set_done == false
         new_entries.push([k_target, v_val])
     end
 

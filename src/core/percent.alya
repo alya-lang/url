@@ -12,11 +12,11 @@
 ## `1` for unreserved characters, `0` otherwise.
 pub function _url_is_unreserved(code: int) -> int
     return when
-        code >= 48 and code <= 57  => 1
-        code >= 65 and code <= 90  => 1
-        code >= 97 and code <= 122 => 1
-        code == 45 or code == 46 or code == 95 or code == 126 => 1
-        else => 0
+        code >= 48 and code <= 57  => true
+        code >= 65 and code <= 90  => true
+        code >= 97 and code <= 122 => true
+        code == 45 or code == 46 or code == 95 or code == 126 => true
+        else => false
     end
 end
 
@@ -85,7 +85,7 @@ pub function url_encode(text) -> string
     let i = 0
     while i < slen
         let code = char_code_at(s, i)
-        if _url_is_unreserved(code) == 1
+        if _url_is_unreserved(code) == true
             res += chr(code)
         else
             let hex = _url_to_hex(code)
@@ -188,7 +188,7 @@ pub function url_encode_path(text) -> string
     while i < slen
         let ch = char_at(s, i)
         let code = char_code_at(s, i)
-        if ch == "/" or _url_is_unreserved(code) == 1
+        if ch == "/" or _url_is_unreserved(code) == true
             res += ch
         else
             let hex = _url_to_hex(code)

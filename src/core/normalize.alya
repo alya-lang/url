@@ -38,7 +38,7 @@ function _normalize_percent_encoding(s: string) -> string
             let h2 = _url_from_hex(char_at(s, i + 2))
             if h1 >= 0 and h2 >= 0
                 let code = h1 * 16 + h2
-                if _url_is_unreserved(code) == 1
+                if _url_is_unreserved(code) == true
                     res += chr(code)
                 else
                     let hex = _url_to_hex(code)
