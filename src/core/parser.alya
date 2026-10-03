@@ -288,7 +288,7 @@ end
 ##
 ## ### Returns
 ## `1` for HTTPS, `0` otherwise.
-pub function url_is_https(u: Url) -> int
+pub function url_is_https(u: Url) -> bool
     let sc = _url_field(u.scheme)
     return sc == "https"
 end
@@ -300,7 +300,7 @@ end
 ##
 ## ### Returns
 ## `1` for HTTP, `0` otherwise.
-pub function url_is_http(u: Url) -> int
+pub function url_is_http(u: Url) -> bool
     let sc = _url_field(u.scheme)
     return sc == "http"
 end
