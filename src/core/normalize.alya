@@ -42,7 +42,7 @@ function _normalize_percent_encoding(s: string) -> string
                     res += chr(code)
                 else
                     let hex = _url_to_hex(code)
-                    res += "%{hex}"
+                    res += f"%{hex}"
                 end
                 i += 2
             else

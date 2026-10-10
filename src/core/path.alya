@@ -105,7 +105,7 @@ pub function url_remove_dot_segments(path) -> string
     let out = ""
     for item in stack
         let seg_str = str_from_ptr(item)
-        out += "/{seg_str}"
+        out += f"/{seg_str}"
     end
 
     if len(out) == 0
@@ -153,7 +153,7 @@ pub function url_join_path(base_path, rel_path) -> string
     if b_ends_slash == true and r_starts_slash == true
         return substring(b, 0, blen - 1) + r
     elif b_ends_slash == false and r_starts_slash == false
-        return "{b}/{r}"
+        return f"{b}/{r}"
     else
         return b + r
     end
@@ -203,7 +203,7 @@ pub function url_join(base, relative) -> string
 
     # Protocol-relative URL: //example.com/foo
     if len(r) >= 2 and substring(r, 0, 2) == "//"
-        return "{scheme}:{r}"
+        return f"{scheme}:{r}"
     end
 
     # Find authority and path in base
@@ -230,7 +230,7 @@ pub function url_join(base, relative) -> string
 
     # 1. Query-only relative: ?q=1
     if char_at(r, 0) == "?"
-        return "{scheme}://{authority}{b_path}{r}"
+        return f"{scheme}://{authority}{b_path}{r}"
     end
 
     # 2. Fragment-only relative: #section
@@ -241,7 +241,7 @@ pub function url_join(base, relative) -> string
     # 3. Absolute path relative: /new/path
     if char_at(r, 0) == "/"
         let norm_path = url_remove_dot_segments(r)
-        return "{scheme}://{authority}{norm_path}"
+        return f"{scheme}://{authority}{norm_path}"
     end
 
     # 4. Relative path: dir/file or ../file
@@ -263,5 +263,5 @@ pub function url_join(base, relative) -> string
 
     let merged = base_dir + r
     let clean_path = url_remove_dot_segments(merged)
-    return "{scheme}://{authority}{clean_path}"
+    return f"{scheme}://{authority}{clean_path}"
 end

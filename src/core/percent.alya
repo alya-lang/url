@@ -46,7 +46,7 @@ pub function _url_to_hex(code: int) -> string
     let lo = code % 16
     let hi_ch = _url_hex_char(hi)
     let lo_ch = _url_hex_char(lo)
-    return "{hi_ch}{lo_ch}"
+    return f"{hi_ch}{lo_ch}"
 end
 
 ## Converts a hex character to its numeric value.
@@ -89,7 +89,7 @@ pub function url_encode(text) -> string
             res += chr(code)
         else
             let hex = _url_to_hex(code)
-            res += "%{hex}"
+            res += f"%{hex}"
         end
         i += 1
     end
@@ -192,7 +192,7 @@ pub function url_encode_path(text) -> string
             res += ch
         else
             let hex = _url_to_hex(code)
-            res += "%{hex}"
+            res += f"%{hex}"
         end
         i += 1
     end

@@ -12,18 +12,18 @@ function main()
     say "\n[1] Parsing Complex URL:"
     let raw = "https://developer:token123@api.alya-lang.org:8443/v1/packages/search?q=crypto&page=1#results"
     let u = url::parse(raw)
-    say "  Scheme   : {u.scheme}"
-    say "  User     : {u.username}"
-    say "  Password : {u.password}"
-    say "  Host     : {u.host}"
-    say "  Port     : {u.port}"
-    say "  Path     : {u.path}"
-    say "  Query    : {u.query}"
-    say "  Fragment : {u.fragment}"
+    say f"  Scheme   : {u.scheme}"
+    say f"  User     : {u.username}"
+    say f"  Password : {u.password}"
+    say f"  Host     : {u.host}"
+    say f"  Port     : {u.port}"
+    say f"  Path     : {u.path}"
+    say f"  Query    : {u.query}"
+    say f"  Fragment : {u.fragment}"
     let origin = url::url_origin(u)
     let is_https = url::url_is_https(u)
-    say "  Origin   : {origin}"
-    say "  Is HTTPS : {is_https}"
+    say f"  Origin   : {origin}"
+    say f"  Is HTTPS : {is_https}"
 
     @cfg(feature = "query")
     demo_query()
@@ -37,10 +37,10 @@ function main()
     let join_auth = url::join(base, "auth")
     let join_v2 = url::join(base, "../v2/overview")
     let join_root = url::join(base, "/root")
-    say "  Base         : {base}"
-    say "  Join 'auth'  : {join_auth}"
-    say "  Join '../v2' : {join_v2}"
-    say "  Join '/root' : {join_root}"
+    say f"  Base         : {base}"
+    say f"  Join 'auth'  : {join_auth}"
+    say f"  Join '../v2' : {join_v2}"
+    say f"  Join '/root' : {join_root}"
 
     @cfg(feature = "normalize")
     demo_normalize()
@@ -55,12 +55,12 @@ function demo_query()
     let sp = url::search_params_from(u.query)
     let q_val = url::search_params_get(sp, "q")
     let page_val = url::search_params_get(sp, "page")
-    say "  Param 'q'    : {q_val}"
-    say "  Param 'page' : {page_val}"
+    say f"  Param 'q'    : {q_val}"
+    say f"  Param 'page' : {page_val}"
     url::search_params_append(sp, "sort", "stars")
     url::search_params_set(sp, "page", "2")
     let new_q = url::search_params_to_string(sp)
-    say "  New Query    : {new_q}"
+    say f"  New Query    : {new_q}"
 end
 
 @cfg(feature = "builder")
@@ -75,7 +75,7 @@ function demo_builder()
     url::builder_param(b, "tab", "readme-ov-file")
     url::builder_fragment(b, "contributing")
     let built_url = url::builder_to_string(b)
-    say "  Built URL    : {built_url}"
+    say f"  Built URL    : {built_url}"
 end
 
 @cfg(feature = "normalize")
@@ -84,7 +84,7 @@ function demo_normalize()
     say "\n[5] URL Normalization:"
     let messy = "HTTP://EXAMPLE.COM:80/a/b/../c/./d?z=2&a=1"
     let normalized = url::normalize(messy)
-    say "  Messy        : {messy}"
-    say "  Normalized   : {normalized}"
+    say f"  Messy        : {messy}"
+    say f"  Normalized   : {normalized}"
 end
 main()

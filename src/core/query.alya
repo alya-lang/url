@@ -21,9 +21,9 @@ pub function url_format_query(m) -> string
     for k, v in m
         let enc_k = url_encode(str_from_ptr(k))
         let enc_v = url_encode(str_from_ptr(v))
-        let pair = "{enc_k}={enc_v}"
+        let pair = f"{enc_k}={enc_v}"
         if not first
-            out += "&{pair}"
+            out += f"&{pair}"
         else
             out = pair
             first = false
@@ -175,11 +175,11 @@ pub function url_append_query_param(raw_url, key, value) -> string
     let u = url_parse(raw_url)
     let enc_k = url_encode(str_from_ptr(key))
     let enc_v = url_encode(str_from_ptr(value))
-    let pair = "{enc_k}={enc_v}"
+    let pair = f"{enc_k}={enc_v}"
 
     let current_q = str_from_ptr(u.query)
     if len(current_q) > 0
-        u.query = "{current_q}&{pair}"
+        u.query = f"{current_q}&{pair}"
     else
         u.query = pair
     end
@@ -435,9 +435,9 @@ pub function search_params_to_string(sp: UrlSearchParams) -> string
     for pair in sp.entries
         let k = url_encode(str_from_ptr(pair[0]))
         let v = url_encode(str_from_ptr(pair[1]))
-        let item = "{k}={v}"
+        let item = f"{k}={v}"
         if not first
-            out += "&{item}"
+            out += f"&{item}"
         else
             out = item
             first = false

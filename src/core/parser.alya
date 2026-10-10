@@ -212,16 +212,16 @@ pub function url_format(u: Url) -> string
 
     if len(sc) > 0
         if len(h) > 0 or pth == "/" or len(pth) == 0 or substring(pth, 0, 1) == "/"
-            res += "{sc}://"
+            res += f"{sc}://"
         else
-            res += "{sc}:"
+            res += f"{sc}:"
         end
     end
 
     if len(un) > 0
         res += un
         if len(pw) > 0
-            res += ":{pw}"
+            res += f":{pw}"
         end
         res += "@"
     end
@@ -229,7 +229,7 @@ pub function url_format(u: Url) -> string
     res += h
 
     if len(p) > 0
-        res += ":{p}"
+        res += f":{p}"
     end
 
     if len(pth) > 0
@@ -237,11 +237,11 @@ pub function url_format(u: Url) -> string
     end
 
     if len(q) > 0
-        res += "?{q}"
+        res += f"?{q}"
     end
 
     if len(frag) > 0
-        res += "#{frag}"
+        res += f"#{frag}"
     end
 
     return res
@@ -272,11 +272,11 @@ pub function url_origin(u: Url) -> string
     let p = _url_field(u.port)
 
     if len(sc) > 0
-        res += "{sc}://"
+        res += f"{sc}://"
     end
     res += h
     if len(p) > 0
-        res += ":{p}"
+        res += f":{p}"
     end
     return res
 end
