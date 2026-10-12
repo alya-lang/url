@@ -26,7 +26,7 @@ function main()
     say f"  Is HTTPS : {is_https}"
 
     @cfg(feature = "query")
-    demo_query()
+    demo_query(u.query)
 
     @cfg(feature = "builder")
     demo_builder()
@@ -49,10 +49,10 @@ function main()
 end
 
 @cfg(feature = "query")
-function demo_query()
+function demo_query(query_str)
     # 2. Working with UrlSearchParams
     say "\n[2] UrlSearchParams Manipulation:"
-    let sp = url::search_params_from(u.query)
+    let sp = url::search_params_from(query_str)
     let q_val = url::search_params_get(sp, "q")
     let page_val = url::search_params_get(sp, "page")
     say f"  Param 'q'    : {q_val}"
